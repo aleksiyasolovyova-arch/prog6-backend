@@ -1,6 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 
-import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
+import kdg.be.prog6.kdg.restaurant.domain.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,5 +22,20 @@ public class RestaurantMapper {
 
     public void updateDomain(Restaurant domain, RestaurantEntity entity) {
 
+    }
+    
+    public Restaurant toDomain(RestaurantEntity entity) {
+        return Restaurant.reconstitute(
+                RestaurantId.from(entity.getId()),
+                OwnerId.from(entity.getOwnerId().toString()),
+                entity.getName(),
+                entity.getAddress().toDomain(),
+                Email.of(entity.getContactEmail()),
+                entity.getPictureUrls(),
+                CuisineType.valueOf(entity.getCuisineType()),
+                PreparationTime.ofMinutes(entity.getDefaultPreparationTimeMinutes()),
+                entity.getOpeningHours().toDomain(),
+                entity.getCreatedAt()
+        );
     }
 }

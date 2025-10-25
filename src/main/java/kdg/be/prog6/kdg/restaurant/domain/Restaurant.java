@@ -79,8 +79,6 @@ public class Restaurant {
             CuisineType cuisineType,
             PreparationTime defaultPreparationTime,
             OpeningHours openingHours,
-            boolean manuallyOpen,
-            boolean manuallyClosed,
             LocalDateTime createdAt) {
 
         Restaurant restaurant = new Restaurant();
@@ -93,8 +91,6 @@ public class Restaurant {
         restaurant.cuisineType = cuisineType;
         restaurant.defaultPreparationTime = defaultPreparationTime;
         restaurant.openingHours = openingHours;
-        restaurant.manuallyOpen = manuallyOpen;
-        restaurant.manuallyClosed = manuallyClosed;
         restaurant.createdAt = createdAt;
 
         return restaurant;

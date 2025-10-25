@@ -12,6 +12,17 @@ public record RestaurantId(UUID uuid) {
         return new RestaurantId(UUID.randomUUID());
     }
 
+    public static RestaurantId from(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("RestaurantID ID cannot be blank");
+        }
+        try {
+            return new RestaurantId(id);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid UUID format for Restaurant ID: " + id, e);
+        }
+    }
+
     public void notFound() throws RestaurantNotFoundException {
         throw new RestaurantNotFoundException(String.format("Restaurant with UUID %s was not found", this.uuid));
     }
