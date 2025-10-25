@@ -6,4 +6,14 @@ public record Email(String value) {
             throw new IllegalArgumentException("Invalid email format");
         }
     }
+
+    public static Email of(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be blank");
+        }
+        if (!email.contains("@")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        return new Email(email);
+    }
 }

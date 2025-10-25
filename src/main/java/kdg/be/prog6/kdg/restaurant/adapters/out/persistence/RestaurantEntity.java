@@ -4,13 +4,17 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "restaurants")
 public class RestaurantEntity {
     @Id
-    private String id;
-    private String ownerId;
+    @Column(columnDefinition = "uuid")
+    private UUID id;  // ← Change from String to UUID
+
+    @Column(name = "owner_id", columnDefinition = "uuid")
+    private UUID ownerId;
     private String name;
     @Embedded
     private AddressEmbeddable address;
@@ -23,19 +27,35 @@ public class RestaurantEntity {
     private OpeningHoursEmbeddable openingHours;
     private LocalDateTime createdAt;
 
-    public String getId() {
+    public RestaurantEntity() {
+    }
+
+    public RestaurantEntity(UUID id, UUID ownerId, String name, AddressEmbeddable address, String contactEmail, List<String> pictureUrls, String cuisineType, int defaultPreparationTimeMinutes, OpeningHoursEmbeddable openingHours, LocalDateTime createdAt) {
+        this.id = id;
+        this.ownerId = ownerId;
+        this.name = name;
+        this.address = address;
+        this.contactEmail = contactEmail;
+        this.pictureUrls = pictureUrls;
+        this.cuisineType = cuisineType;
+        this.defaultPreparationTimeMinutes = defaultPreparationTimeMinutes;
+        this.openingHours = openingHours;
+        this.createdAt = createdAt;
+    }
+
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
-    public String getOwnerId() {
+    public UUID getOwnerId() {
         return ownerId;
     }
 
-    public void setOwnerId(String ownerId) {
+    public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
     }
 

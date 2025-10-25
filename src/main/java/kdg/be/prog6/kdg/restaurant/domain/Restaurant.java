@@ -1,5 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.domain;
 
+import kdg.be.prog6.kdg.common.events.*;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.*;
 import org.jmolecules.event.types.DomainEvent;
 
@@ -59,10 +60,10 @@ public class Restaurant {
         restaurant.createdAt = LocalDateTime.now();
 
         restaurant.registerEvent(new RestaurantCreatedEvent(
-                restaurant.restaurantId,
-                ownerId,
+                restaurant.restaurantId.uuid(),
+                ownerId.uuid(),
                 name,
-                cuisineType
+                cuisineType.name()
         ));
 
         return restaurant;
@@ -107,7 +108,7 @@ public class Restaurant {
         );
         draftDishes.add(draft);
 
-        registerEvent(new DishDraftCreatedevent(draft.getId(), this.restaurantId, true));
+        registerEvent(new DishDraftCreatedEvent(draft.getId().uuid(), this.restaurantId.uuid(), true));
         return draft;
     }
 
@@ -126,7 +127,7 @@ public class Restaurant {
         );
         draftDishes.add(draft);
 
-        registerEvent(new DishEditStartedEvent(draft.getId(), dishId, this.id));
+        registerEvent(new DishEditStartedEvent(draft.getId().uuid(), dishId.uuid(), this.restaurantId.uuid()));
         return draft;
     }
 
@@ -139,7 +140,7 @@ public class Restaurant {
         DishDraft draft = findDraftById(draftId);
         draftDishes.remove(draft);
 
-        registerEvent(new DishDraftDiscarderEvent(DraftId, this.restaurantId));
+        registerEvent(new DishDraftDiscardedEvent(draftId.uuid(), this.restaurantId.uuid()));
     }
 
     public void publishDraft(DraftId draftId) {
@@ -154,11 +155,11 @@ public class Restaurant {
         if (draft.isNewDish()) {
             Dish newDish = draft.toPublishedDish();
             publishedDishes.add(newDish);
-            registerEvent(new DishPublishedEvent(newDish.getId(), this.id, newDish.getName()));
+            registerEvent(new DishPublishedEvent(newDish.getId().uuid(), this.restaurantId.uuid(), newDish.getName()));
         } else {
             Dish existingDish = findPublishedDishById(draft.getOriginalDishId());
             draft.applyChangesTo(existingDish);
-            registerEvent(new DishUpdatedEvent(existingDish.getId(), this.id, existingDish.getName()));
+            registerEvent(new DishUpdatedEvent(existingDish.getId().uuid(), this.restaurantId.uuid(), existingDish.getName()));
         }
         //you gotta remove the draft after successfully publish, obv
         draftDishes.remove(draft);
@@ -184,12 +185,12 @@ public class Restaurant {
         List<DishDraft> draftsToPublish = new ArrayList<>(draftDishes);
         draftsToPublish.forEach(draft -> publishDraft(draft.getId()));
 
-        registerEvent(new AllDraftsPublishedEvent(this.restaurantId, draftsToPublish.size()));
+        registerEvent(new AllDraftsPublishedEvent(this.restaurantId.uuid(), draftsToPublish.size()));
     }
 
     public void schedulePublishAllDrafts(LocalDateTime publishAt) {
         if (publishAt.isBefore(LocalDateTime.now())) {
-            throw new InvalidScheduleException("Cannot schedule publication in the past")
+            throw new InvalidScheduleException("Cannot schedule publication in the past");
         }
 
         if (draftDishes.isEmpty()) {
@@ -205,7 +206,7 @@ public class Restaurant {
         }
         draftDishes.forEach(draft -> draft.schedulePublish(publishAt));
 
-        registerEvent(new DraftsScheduledEvent(this.restaurantId, publishAt, draftDishes.size()));
+        registerEvent(new DraftsScheduledEvent(this.restaurantId.uuid(), publishAt, draftDishes.size()));
     }
 
     public void publishScheduledDrafts(LocalDateTime currentTime) {
@@ -223,7 +224,7 @@ public class Restaurant {
 
         if (countAvailableDishes() + newDishesCount > MAX_AVAILABLE_DISHES) {
             registerEvent(new ScheduledPublishFailedEvent(
-                    this.restaurantId,
+                    this.restaurantId.uuid(),
                     "Would exceed 10-dish limit",
                     readyToPublish.size()
             ));
@@ -239,7 +240,7 @@ public class Restaurant {
         Dish dish = findPublishedDishById(dishId);
         publishedDishes.remove(dish);
 
-        registerEvent(new DishUnpublishedEvent(dish, this.restaurantId, dish.getName()));
+        registerEvent(new DishUnpublishedEvent(dishId.uuid(), this.restaurantId.uuid(), dish.getName()));
     }
 
     //Both marking out and in stock are immediate, so no drafts involved
@@ -247,14 +248,14 @@ public class Restaurant {
         Dish dish = findPublishedDishById(dishId);
         dish.markAsOutOfStock();
 
-        registerEvent(new DishMarkedOutOfStockEvent(dishId, this.restaurantId));
+        registerEvent(new DishMarkedOutOfStockEvent(dishId.uuid(), this.restaurantId.uuid()));
     }
 
     public void markDishInStock(DishId dishId) {
         Dish dish = findPublishedDishById(dishId);
         dish.markInStock();
 
-        registerEvent(new DishMarkedInStockEvent(dishId, this.id));
+        registerEvent(new DishMarkedInStockEvent(dishId.uuid(), this.restaurantId.uuid()));
     }
 
 
@@ -275,7 +276,7 @@ public class Restaurant {
         this.manuallyOpen = true;
         this.manuallyClosed = false;
 
-        registerEvent(new RestaurantOpenedEvent(this.id, true));
+        registerEvent(new RestaurantOpenedEvent(this.restaurantId.uuid(), true));
     }
 
     public void closeManually() {
@@ -285,7 +286,7 @@ public class Restaurant {
         this.manuallyOpen = false;
         this.manuallyClosed = true;
 
-        registerEvent(new RestaurantClosedEvent(this.restaurantId, true));
+        registerEvent(new RestaurantClosedEvent(this.restaurantId.uuid(), true));
     }
 
     public void resetManualOverride() {
@@ -295,9 +296,9 @@ public class Restaurant {
 
         if (wasManuallyControlled) {
             if (openingHours.isOpenNow()) {
-                registerEvent(new RestaurantOpenedEvent(this.id, false));
+                registerEvent(new RestaurantOpenedEvent(this.restaurantId.uuid(), false));
             } else {
-                registerEvent(new RestaurantClosedEvent(this.id, false));
+                registerEvent(new RestaurantClosedEvent(this.restaurantId.uuid(), false));
             }
         }
     }
@@ -337,7 +338,7 @@ public class Restaurant {
     }
 
     private void registerEvent(DomainEvent event) {
-        domainEvents.add(event);
+        events.add(event);
     }
 
     public int getPendingChangesCount() {
@@ -363,11 +364,11 @@ public class Restaurant {
     }
 
     public List<DomainEvent> getDomainEvents() {
-        return new ArrayList<>(domainEvents);
+        return new ArrayList<>(events);
     }
 
     public void clearDomainEvents() {
-        domainEvents.clear();
+        events.clear();
     }
 
     // Used by repository for reconstitution
@@ -378,6 +379,7 @@ public class Restaurant {
     public void addReconstitutedDraft(DishDraft draft) {
         draftDishes.add(draft);
     }
+
 
     public RestaurantId getId() {
         return restaurantId;

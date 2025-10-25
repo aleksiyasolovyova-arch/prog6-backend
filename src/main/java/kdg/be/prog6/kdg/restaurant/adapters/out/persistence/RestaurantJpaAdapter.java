@@ -8,6 +8,11 @@ public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
     private final RestaurantJpaRepository jpaRepo;
     private final RestaurantMapper mapper;
 
+
+    public RestaurantJpaAdapter(RestaurantJpaRepository jpaRepo, RestaurantMapper mapper) {
+        this.jpaRepo = jpaRepo;
+        this.mapper = mapper;
+    }
     @Override
     public void save(Restaurant restaurant) {
         var entity = mapper.toEntity(restaurant);

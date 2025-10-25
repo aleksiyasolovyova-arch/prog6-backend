@@ -12,6 +12,17 @@ public class Dish {
     private String description;
     private String pictureUrl;
 
+    public Dish(DishId id, RestaurantId restaurantId, String name, DishType type, Money price, String description, String pictureUrl, Set<FoodTag> foodTags) {
+        this.id = id;
+        this.restaurantId = restaurantId;
+        this.name = name;
+        this.type = type;
+        this.price = price;
+        this.description = description;
+        this.pictureUrl = pictureUrl;
+        this.foodTags = foodTags;
+    }
+
     public DishId getId() {
         return id;
     }
@@ -60,6 +71,10 @@ public class Dish {
     }
     public RestaurantId getRestaurantId() {
         return restaurantId;
+    }
+
+    public static Dish create(DishId id, RestaurantId restaurantId, String name, DishType type, Set<FoodTag> foodTags, Money price, String description, String pictureUrl) {
+        return new Dish(id, restaurantId, name, type, price, description, pictureUrl, foodTags);
     }
 
 
