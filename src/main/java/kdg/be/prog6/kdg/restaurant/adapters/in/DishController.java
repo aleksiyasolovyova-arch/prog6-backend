@@ -1,6 +1,7 @@
 package kdg.be.prog6.kdg.restaurant.adapters.in;
 
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateDishDraftRequest;
+import kdg.be.prog6.kdg.restaurant.adapters.in.request.UpdateDishDraftRequest;
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.DishIdResponse;
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.DraftIdResponse;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
@@ -21,13 +22,19 @@ public class DishController {
     private final UnpublishDishPort unpublishDishPort;
     private final MarkOutOfStockPort markOutOfStockPort;
     private final MarkInStockPort markInStockPort;
+    private final CreateDraftForEditingPort createDraftForEditingPort;
+    private final EditDishDraftPort editDishDraftPort;
+    private final DiscardDraftPort discardDraftPort;
 
-    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;
         this.unpublishDishPort = unpublishDishPort;
         this.markOutOfStockPort = markOutOfStockPort;
         this.markInStockPort = markInStockPort;
+        this.createDraftForEditingPort = createDraftForEditingPort;
+        this.editDishDraftPort = editDishDraftPort;
+        this.discardDraftPort = discardDraftPort;
     }
 
     @PostMapping("/drafts")
@@ -38,6 +45,45 @@ public class DishController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new DraftIdResponse(id.uuid()));
+    }
+    
+    @PostMapping("/{dishId}/drafts")
+    public ResponseEntity<DraftIdResponse> createDraftForEditing(
+            @PathVariable UUID dishId,
+            @RequestParam UUID restaurantId
+    ) {
+        DraftId draftId = createDraftForEditingPort.createDraftForEditing(
+                new CreateDraftForEditingCommand(
+                        DishId.from(dishId),
+                        RestaurantId.from(restaurantId)
+                )
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(new DraftIdResponse(draftId.uuid()));
+    }
+
+    @PatchMapping("/drafts/{draftId}")
+    public ResponseEntity<Void> editDraft(
+            @PathVariable UUID draftId,
+            @RequestBody UpdateDishDraftRequest request
+    ) {
+       editDishDraftPort.editDraft(new EditDishDraftCommand(
+               DraftId.from(draftId),
+               request.restaurantId(),
+               request.toDetails()
+       ));
+       return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/drafts/{draftId}")
+    public ResponseEntity<Void> discardDraft(
+            @PathVariable UUID draftId,
+            @RequestParam UUID restaurantId
+    ) {
+        discardDraftPort.discardDraft(new DiscardDishDraftCommand(
+                RestaurantId.from(restaurantId),
+                DraftId.from(draftId)
+        ));
+        return ResponseEntity.noContent().build();
     }
 
    @PostMapping("/drafts/{draftId}/publish")

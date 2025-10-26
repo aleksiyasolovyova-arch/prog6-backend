@@ -4,25 +4,28 @@ import jakarta.transaction.Transactional;
 import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
-import kdg.be.prog6.kdg.restaurant.ports.in.MarkInStockCommand;
-import kdg.be.prog6.kdg.restaurant.ports.in.MarkInStockPort;
+import kdg.be.prog6.kdg.restaurant.ports.in.PublishAllDraftsCommand;
+import kdg.be.prog6.kdg.restaurant.ports.in.PublishAllDraftsPort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MarkInStockUseCaseImpl implements MarkInStockPort {
+public class PublishAllDraftsUseCaseImpl implements PublishAllDraftsPort {
     private final RestaurantRepositoryPort restaurantRepository;
-    public MarkInStockUseCaseImpl(RestaurantRepositoryPort restaurantRepository) {
+
+    public PublishAllDraftsUseCaseImpl(RestaurantRepositoryPort restaurantRepository) {
         this.restaurantRepository = restaurantRepository;
     }
 
     @Override
     @Transactional
-    public void markInStock(MarkInStockCommand command) {
+    public int publishAllDrafts(PublishAllDraftsCommand command) {
         Restaurant restaurant = restaurantRepository.findById(command.restaurantId())
-                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant Not Found"));
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found"));
 
-        restaurant.markDishInStock(command.dishId());
-
+        int countBefore = restaurant.getPendingChangesCount();
+        restaurant.publishAllDrafts();
         restaurantRepository.save(restaurant);
-    }
+
+        return countBefore;
+        }
 }
