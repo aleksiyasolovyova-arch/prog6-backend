@@ -11,7 +11,7 @@ import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftCommand;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftPort;
 import org.springframework.stereotype.Service;
 
-//TODO: FIX THE CREATION OF DRAFTS WITH DISHDETAILS AND WORK OUT THE WHOLE FLOW FOR CREATING A DRAFT
+
 @Service
 public class CreateDishDraftUseCaseImpl implements CreateDishDraftPort {
     private final RestaurantRepositoryPort restaurantRepository;
@@ -23,7 +23,8 @@ public class CreateDishDraftUseCaseImpl implements CreateDishDraftPort {
     @Override
     @Transactional
     public DraftId createDishDraft(CreateDishDraftCommand cmd) {
-        Restaurant restaurant = restaurantRepository.findById(cmd.restaurantId());
+        Restaurant restaurant = restaurantRepository.findById(cmd.restaurantId()).orElseThrow(() -> new RestaurantNotFoundException(
+                "Restaurant not found with ID: " + cmd.restaurantId()));
         DishDraft draft = restaurant.createDraftForNewDish(cmd.details());
         restaurantRepository.save(restaurant);
         return draft.getId();

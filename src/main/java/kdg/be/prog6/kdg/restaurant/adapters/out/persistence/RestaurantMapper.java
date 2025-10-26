@@ -23,7 +23,23 @@ public class RestaurantMapper {
         e.setOpeningHours(OpeningHoursEmbeddable.from(restaurantDomain.getOpeningHours()));
         e.setCreatedAt(restaurantDomain.getCreatedAt());
 
-        // Map the draft dishes if mapper is available
+        // Map the published dishes
+        e.setPublishedDishes(
+            restaurantDomain.getPublishedDishes().stream()
+                .map(dish -> {
+                    // Convert Dish domain to DishEntity
+                    DishEntity entity = new DishEntity();
+                    entity.setId(dish.getId().uuid());
+                    entity.setRestaurantId(restaurantDomain.getId().uuid());
+                    entity.setDetails(DishDetailsEmbeddable.from(dish.getDetails()));
+                    entity.setAvailableForOrder(dish.isAvailableForOrder());
+                    entity.setCreatedAt(dish.getCreatedAt());
+                    entity.setUpdatedAt(dish.getUpdatedAt());
+                    return entity;
+                })
+                .toList()
+        );
+        
         if (dishDraftMapper != null) {
             e.setDraftDishes(
                 restaurantDomain.getDraftDishes().stream()
@@ -64,6 +80,22 @@ public class RestaurantMapper {
             entity.getDraftDishes().forEach(draftEntity -> {
                 DishDraft draft = dishDraftMapper.toDomain(draftEntity);
                 restaurant.addReconstitutedDraft(draft);
+            });
+        }
+
+        //Reconstitute published dishes
+        if (entity.getPublishedDishes() != null) {
+            entity.getPublishedDishes().forEach(dishEntity -> {
+                // Convert DishEntity back to Dish domain object
+                Dish dish = Dish.reconstitute(
+                        DishId.from(dishEntity.getId()),
+                        RestaurantId.from(dishEntity.getRestaurantId()),
+                        dishEntity.getDetails().toDomain(),
+                        dishEntity.isAvailableForOrder(),
+                        dishEntity.getCreatedAt(),
+                        dishEntity.getUpdatedAt()
+                );
+                restaurant.addReconstitutedDish(dish);
             });
         }
 

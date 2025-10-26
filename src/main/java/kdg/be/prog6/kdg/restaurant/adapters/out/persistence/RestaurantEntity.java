@@ -32,6 +32,11 @@ public class RestaurantEntity {
     @OneToMany(mappedBy = "restaurantId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DishDraftEntity> draftDishes = new ArrayList<>();
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "restaurant_id")  // Foreign key in dishes table
+    private List<DishEntity> publishedDishes = new ArrayList<>();
+
+
     public RestaurantEntity() {
     }
 
@@ -134,5 +139,13 @@ public class RestaurantEntity {
 
     public void setDraftDishes(List<DishDraftEntity> draftDishes) {
         this.draftDishes = draftDishes;
+    }
+
+    public List<DishEntity> getPublishedDishes() {
+        return publishedDishes;
+    }
+
+    public void setPublishedDishes(List<DishEntity> publishedDishes) {
+        this.publishedDishes = publishedDishes;
     }
 }

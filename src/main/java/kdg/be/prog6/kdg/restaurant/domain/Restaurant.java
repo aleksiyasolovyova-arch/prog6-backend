@@ -139,27 +139,32 @@ public class Restaurant {
         registerEvent(new DishDraftDiscardedEvent(draftId.uuid(), this.restaurantId.uuid()));
     }
 
-    public void publishDraft(DraftId draftId) {
+    // domain/Restaurant.java
+    public DishId publishDraft(DraftId draftId) {
         DishDraft draft = findDraftById(draftId);
 
         if (draft.isNewDish() && countAvailableDishes() >= MAX_AVAILABLE_DISHES) {
-            throw new DishLimitExceededException(
-                    String.format("Cannot publish new dish. Maximum of %d dishes already available.",
-                            MAX_AVAILABLE_DISHES)
-            );
+            throw new DishLimitExceededException("Dish limit has been exceeded.");
         }
+
+        DishId publishedDishId;
+
         if (draft.isNewDish()) {
             Dish newDish = draft.toPublishedDish();
             publishedDishes.add(newDish);
+            publishedDishId = newDish.getId();
             registerEvent(new DishPublishedEvent(newDish.getId().uuid(), this.restaurantId.uuid(), newDish.getName()));
         } else {
             Dish existingDish = findPublishedDishById(draft.getOriginalDishId());
             draft.applyChangesTo(existingDish);
+            publishedDishId = existingDish.getId();
             registerEvent(new DishUpdatedEvent(existingDish.getId().uuid(), this.restaurantId.uuid(), existingDish.getName()));
         }
-        //you gotta remove the draft after successfully publish, obv
+
         draftDishes.remove(draft);
+        return publishedDishId;
     }
+
 
     public void publishAllDrafts() {
         if (draftDishes.isEmpty()) {

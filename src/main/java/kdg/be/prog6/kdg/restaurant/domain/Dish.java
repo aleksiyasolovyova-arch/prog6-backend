@@ -29,6 +29,25 @@ public class Dish {
         return dish;
     }
 
+    public static Dish reconstitute(
+            DishId id,
+            RestaurantId restaurantId,
+            DishDetails details,
+            boolean availableForOrder,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt
+    ) {
+        Dish dish = new Dish();
+        dish.id = id;
+        dish.restaurantId = restaurantId;
+        dish.details = details;
+        dish.availableForOrder = availableForOrder;
+        dish.createdAt = createdAt;
+        dish.updatedAt = updatedAt;
+        return dish;
+    }
+
+
     // Update all details at once
     public void updateDetails(DishDetails newDetails) {
         this.details = newDetails;
@@ -59,4 +78,12 @@ public class Dish {
     public DishType getType() { return details.type(); }
     public String getDescription() { return details.description(); }
     public String getPictureUrl() { return details.pictureUrl(); }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 }

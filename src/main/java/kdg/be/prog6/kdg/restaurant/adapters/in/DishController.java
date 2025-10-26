@@ -1,23 +1,29 @@
 package kdg.be.prog6.kdg.restaurant.adapters.in;
 
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateDishDraftRequest;
+import kdg.be.prog6.kdg.restaurant.adapters.in.response.DishIdResponse;
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.DraftIdResponse;
+import kdg.be.prog6.kdg.restaurant.domain.DishId;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
+import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftPort;
+import kdg.be.prog6.kdg.restaurant.ports.in.PublishDishDraftCommand;
+import kdg.be.prog6.kdg.restaurant.ports.in.PublishDishPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/dishes")
 public class DishController {
     private final CreateDishDraftPort dishDraftPort;
+    private final PublishDishPort publishDishPort;
 
-    public DishController(CreateDishDraftPort dishDraftPort) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort) {
         this.dishDraftPort = dishDraftPort;
+        this.publishDishPort = publishDishPort;
     }
 
     @PostMapping("/drafts")
@@ -29,4 +35,19 @@ public class DishController {
                 .status(HttpStatus.CREATED)
                 .body(new DraftIdResponse(id.uuid()));
     }
+
+   @PostMapping("/drafts/{draftId}/publish")
+   public ResponseEntity<DishIdResponse> publishDraft(
+           @PathVariable UUID draftId,
+           @RequestParam UUID restaurantId
+   ) {
+       DishId dishId = publishDishPort.publishDraft(
+               new PublishDishDraftCommand(
+                       RestaurantId.from(restaurantId),
+                       DraftId.from(draftId)
+               )
+       );
+       return ResponseEntity.ok(new DishIdResponse(dishId.uuid()));
+   }
+
 }

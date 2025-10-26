@@ -5,6 +5,8 @@ import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
     private final RestaurantJpaRepository jpaRepo;
@@ -23,13 +25,13 @@ public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
     }
 
     @Override
-    public Restaurant findById(RestaurantId id) {
+    public Optional<Restaurant> findById(RestaurantId id) {
         var entity = jpaRepo.findById(id.uuid());
         if (entity.isEmpty()) {
             throw new RestaurantNotFoundException(
                 "Restaurant with ID " + id.uuid() + " not found"
             );
         }
-        return mapper.toDomain(entity.get());
+        return Optional.ofNullable(mapper.toDomain(entity.get()));
     }
 }
