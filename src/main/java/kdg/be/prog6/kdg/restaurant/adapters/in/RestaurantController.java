@@ -1,9 +1,9 @@
 package kdg.be.prog6.kdg.restaurant.adapters.in;
 
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateRestaurantRequest;
+import kdg.be.prog6.kdg.restaurant.adapters.in.response.RestaurantIdResponse;
 import kdg.be.prog6.kdg.restaurant.core.CreateRestaurantUseCaseImpl;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
-import kdg.be.prog6.kdg.restaurant.ports.in.CreateRestaurantCommand;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateRestaurantPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +22,10 @@ public class RestaurantController {
     }
 
     @PostMapping
-    public ResponseEntity<RestaurantId> createRestaurant(
+    public ResponseEntity<RestaurantIdResponse> createRestaurant(
             @RequestBody CreateRestaurantRequest request
             ) {
         RestaurantId id = port.createRestaurant(request.toCommand());
-        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RestaurantIdResponse(id.uuid()));
     }
 }

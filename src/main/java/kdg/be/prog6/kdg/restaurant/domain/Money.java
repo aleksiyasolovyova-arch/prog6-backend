@@ -12,4 +12,8 @@ public record Money(BigDecimal amount, Currency currency) {
             throw new IllegalArgumentException("Amount must be non‐negative");
         }
     }
+
+    public static Money of(BigDecimal amount, String currency) {
+        return new Money(amount, Currency.getInstance(currency));
+    }
 }

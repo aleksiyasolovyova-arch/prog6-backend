@@ -3,6 +3,7 @@ package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,10 @@ public class RestaurantEntity {
     @Embedded
     private OpeningHoursEmbeddable openingHours;
     private LocalDateTime createdAt;
+
+    // Add the relationship to dish drafts
+    @OneToMany(mappedBy = "restaurantId", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<DishDraftEntity> draftDishes = new ArrayList<>();
 
     public RestaurantEntity() {
     }
@@ -121,5 +126,13 @@ public class RestaurantEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<DishDraftEntity> getDraftDishes() {
+        return draftDishes;
+    }
+
+    public void setDraftDishes(List<DishDraftEntity> draftDishes) {
+        this.draftDishes = draftDishes;
     }
 }

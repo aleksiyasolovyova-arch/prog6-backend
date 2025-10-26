@@ -1,12 +1,16 @@
 package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import kdg.be.prog6.kdg.restaurant.domain.Address;
 
 @Embeddable
 public class AddressEmbeddable {
+    @Column(name = "address_street")
     private String street;
+    @Column(name = "address_city")
     private String city;
+    @Column(name = "address_postal_code")
     private String zipCode;
 
     public AddressEmbeddable() {

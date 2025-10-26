@@ -1,89 +1,62 @@
 package kdg.be.prog6.kdg.restaurant.domain;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Dish {
-    private RestaurantId restaurantId;
     private DishId id;
-    private String name;
-    private DishType type;
-    private Money price;
-    private String description;
-    private String pictureUrl;
+    private RestaurantId restaurantId;
+    private DishDetails details;  // ← Wrapped in value object
+    private boolean availableForOrder;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    public Dish(DishId id, RestaurantId restaurantId, String name, DishType type, Money price, String description, String pictureUrl, Set<FoodTag> foodTags) {
-        this.id = id;
-        this.restaurantId = restaurantId;
-        this.name = name;
-        this.type = type;
-        this.price = price;
-        this.description = description;
-        this.pictureUrl = pictureUrl;
-        this.foodTags = foodTags;
+    private Dish() {}
+
+    public static Dish create(
+            DishId id,
+            RestaurantId restaurantId,
+            DishDetails details
+    ) {
+        Dish dish = new Dish();
+        dish.id = id;
+        dish.restaurantId = restaurantId;
+        dish.details = details;
+        dish.availableForOrder = true;
+        dish.createdAt = LocalDateTime.now();
+        dish.updatedAt = LocalDateTime.now();
+        return dish;
     }
 
-    public DishId getId() {
-        return id;
+    // Update all details at once
+    public void updateDetails(DishDetails newDetails) {
+        this.details = newDetails;
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public DishType getType() {
-        return type;
-    }
-
-    public Money getPrice() {
-        return price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getPictureUrl() {
-        return pictureUrl;
-    }
-
-    public Set<FoodTag> getFoodTags() {
-        return foodTags;
-    }
-
-    public boolean isInStock() {
-        return inStock;
-    }
-
-    private Set<FoodTag> foodTags;
-    private boolean inStock = true;
-
+    // Availability management (separate from details)
     public void markAsOutOfStock() {
-        this.inStock = false;
+        this.availableForOrder = false;
     }
 
     public void markInStock() {
-        this.inStock = true;
+        this.availableForOrder = true;
     }
 
     public boolean isAvailableForOrder() {
-        return inStock;
-    }
-    public RestaurantId getRestaurantId() {
-        return restaurantId;
+        return availableForOrder;
     }
 
-    public static Dish create(DishId id, RestaurantId restaurantId, String name, DishType type, Set<FoodTag> foodTags, Money price, String description, String pictureUrl) {
-        return new Dish(id, restaurantId, name, type, price, description, pictureUrl, foodTags);
-    }
+    // Getters
+    public DishId getId() { return id; }
+    public RestaurantId getRestaurantId() { return restaurantId; }
+    public DishDetails getDetails() { return details; }
 
-
-    void applyChanges(DishDetails details){
-        this.name = details.name();
-        this.type = details.type();
-        this.price = details.price();
-        this.description = details.description();
-        this.pictureUrl = details.pictureUrl();
-        this.foodTags = new HashSet<>(details.foodTags());
-    }
+    // Convenience methods (optional - delegate to details)
+    public String getName() { return details.name(); }
+    public Money getPrice() { return details.price(); }
+    public DishType getType() { return details.type(); }
+    public String getDescription() { return details.description(); }
+    public String getPictureUrl() { return details.pictureUrl(); }
 }

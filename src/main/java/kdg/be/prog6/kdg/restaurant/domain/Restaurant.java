@@ -184,53 +184,53 @@ public class Restaurant {
         registerEvent(new AllDraftsPublishedEvent(this.restaurantId.uuid(), draftsToPublish.size()));
     }
 
-    public void schedulePublishAllDrafts(LocalDateTime publishAt) {
-        if (publishAt.isBefore(LocalDateTime.now())) {
-            throw new InvalidScheduleException("Cannot schedule publication in the past");
-        }
-
-        if (draftDishes.isEmpty()) {
-            throw new NoDraftsToPublishException("No drafts available to schedule");
-        }
-
-        long newDishesCount = draftDishes.stream()
-                .filter(DishDraft::isNewDish)
-                .count();
-
-        if (countAvailableDishes() + newDishesCount > MAX_AVAILABLE_DISHES) {
-            throw new DishLimitExceededException("Cannot schedule drafts. Would exceed 10-dish limit when published.");
-        }
-        draftDishes.forEach(draft -> draft.schedulePublish(publishAt));
-
-        registerEvent(new DraftsScheduledEvent(this.restaurantId.uuid(), publishAt, draftDishes.size()));
-    }
-
-    public void publishScheduledDrafts(LocalDateTime currentTime) {
-        List<DishDraft> readyToPublish = draftDishes.stream()
-                .filter(draft -> draft.isScheduledFor(currentTime))
-                .toList();
-
-        if (readyToPublish.isEmpty()) {
-            return;
-        }
-
-        long newDishesCount = readyToPublish.stream()
-                .filter(DishDraft::isNewDish)
-                .count();
-
-        if (countAvailableDishes() + newDishesCount > MAX_AVAILABLE_DISHES) {
-            registerEvent(new ScheduledPublishFailedEvent(
-                    this.restaurantId.uuid(),
-                    "Would exceed 10-dish limit",
-                    readyToPublish.size()
-            ));
-            throw new DishLimitExceededException(
-                    "Scheduled publish cancelled: would exceed 10-dish limit"
-            );
-        }
-
-        readyToPublish.forEach(draft -> publishDraft(draft.getId()));
-    }
+//    public void schedulePublishAllDrafts(LocalDateTime publishAt) {
+//        if (publishAt.isBefore(LocalDateTime.now())) {
+//            throw new InvalidScheduleException("Cannot schedule publication in the past");
+//        }
+//
+//        if (draftDishes.isEmpty()) {
+//            throw new NoDraftsToPublishException("No drafts available to schedule");
+//        }
+//
+//        long newDishesCount = draftDishes.stream()
+//                .filter(DishDraft::isNewDish)
+//                .count();
+//
+//        if (countAvailableDishes() + newDishesCount > MAX_AVAILABLE_DISHES) {
+//            throw new DishLimitExceededException("Cannot schedule drafts. Would exceed 10-dish limit when published.");
+//        }
+//        draftDishes.forEach(draft -> draft.schedulePublish(publishAt));
+//
+//        registerEvent(new DraftsScheduledEvent(this.restaurantId.uuid(), publishAt, draftDishes.size()));
+//    }
+//
+//    public void publishScheduledDrafts(LocalDateTime currentTime) {
+//        List<DishDraft> readyToPublish = draftDishes.stream()
+//                .filter(draft -> draft.isScheduledFor(currentTime))
+//                .toList();
+//
+//        if (readyToPublish.isEmpty()) {
+//            return;
+//        }
+//
+//        long newDishesCount = readyToPublish.stream()
+//                .filter(DishDraft::isNewDish)
+//                .count();
+//
+//        if (countAvailableDishes() + newDishesCount > MAX_AVAILABLE_DISHES) {
+//            registerEvent(new ScheduledPublishFailedEvent(
+//                    this.restaurantId.uuid(),
+//                    "Would exceed 10-dish limit",
+//                    readyToPublish.size()
+//            ));
+//            throw new DishLimitExceededException(
+//                    "Scheduled publish cancelled: would exceed 10-dish limit"
+//            );
+//        }
+//
+//        readyToPublish.forEach(draft -> publishDraft(draft.getId()));
+//    }
 
     public void unpublishDish(DishId dishId) {
         Dish dish = findPublishedDishById(dishId);

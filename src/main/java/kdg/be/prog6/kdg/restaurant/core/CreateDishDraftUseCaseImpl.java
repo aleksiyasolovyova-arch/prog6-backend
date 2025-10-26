@@ -24,14 +24,7 @@ public class CreateDishDraftUseCaseImpl implements CreateDishDraftPort {
     @Transactional
     public DraftId createDishDraft(CreateDishDraftCommand cmd) {
         Restaurant restaurant = restaurantRepository.findById(cmd.restaurantId());
-        DishDetails details = new DishDetails(
-                cmd.name(),
-                cmd.description(),
-                cmd.price(),
-                cmd.dishType(),
-                cmd.preparationTimeMinutes()
-        );
-        DishDraft draft = restaurant.createDraftForNewDish(details);
+        DishDraft draft = restaurant.createDraftForNewDish(cmd.details());
         restaurantRepository.save(restaurant);
         return draft.getId();
     }
