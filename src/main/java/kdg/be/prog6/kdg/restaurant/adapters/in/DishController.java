@@ -19,11 +19,15 @@ public class DishController {
     private final CreateDishDraftPort dishDraftPort;
     private final PublishDishPort publishDishPort;
     private final UnpublishDishPort unpublishDishPort;
+    private final MarkOutOfStockPort markOutOfStockPort;
+    private final MarkInStockPort markInStockPort;
 
-    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;
         this.unpublishDishPort = unpublishDishPort;
+        this.markOutOfStockPort = markOutOfStockPort;
+        this.markInStockPort = markInStockPort;
     }
 
     @PostMapping("/drafts")
@@ -61,4 +65,26 @@ public class DishController {
         return ResponseEntity.noContent().build();
    }
 
+   @PostMapping("/{dishId}/out-of-stock")
+    public ResponseEntity<Void> markOutOfStock (
+            @PathVariable UUID dishId,
+            @RequestParam UUID restaurantId
+   ) {
+        markOutOfStockPort.markOutOfStock(new MarkOutOfStockCommand(
+                RestaurantId.from(restaurantId),
+                DishId.from(dishId)
+        ));return ResponseEntity.noContent().build();
+
+   }
+
+   @PostMapping("/{dishId}/in-stock")
+    public ResponseEntity<Void> markInStock (
+            @PathVariable UUID dishId,
+            @RequestParam UUID restaurantId
+   ){
+        markInStockPort.markInStock(new MarkInStockCommand(
+                RestaurantId.from(restaurantId),
+                DishId.from(dishId)
+        ));return ResponseEntity.noContent().build();
+   }
 }
