@@ -6,9 +6,7 @@ import kdg.be.prog6.kdg.restaurant.adapters.in.response.DraftIdResponse;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
-import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftPort;
-import kdg.be.prog6.kdg.restaurant.ports.in.PublishDishDraftCommand;
-import kdg.be.prog6.kdg.restaurant.ports.in.PublishDishPort;
+import kdg.be.prog6.kdg.restaurant.ports.in.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,10 +18,12 @@ import java.util.UUID;
 public class DishController {
     private final CreateDishDraftPort dishDraftPort;
     private final PublishDishPort publishDishPort;
+    private final UnpublishDishPort unpublishDishPort;
 
-    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;
+        this.unpublishDishPort = unpublishDishPort;
     }
 
     @PostMapping("/drafts")
@@ -48,6 +48,17 @@ public class DishController {
                )
        );
        return ResponseEntity.ok(new DishIdResponse(dishId.uuid()));
+   }
+
+   @DeleteMapping("/{dishId}/unpublish")
+    public ResponseEntity<Void> unpublishDish(
+            @PathVariable UUID dishId,
+            @RequestParam UUID restaurantId
+   ) {
+        unpublishDishPort.unpublishDraft(new UnpublishDishCommand(
+                RestaurantId.from(restaurantId),
+                DishId.from(dishId)));
+        return ResponseEntity.noContent().build();
    }
 
 }

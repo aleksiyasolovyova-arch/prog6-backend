@@ -18,7 +18,6 @@ public class PublishDishUseCaseImpl implements PublishDishPort {
         this.restaurantRepository = restaurantRepository;
     }
 
-    // application/services/PublishDishDraftService.java
     @Override
     @Transactional
     public DishId publishDraft(PublishDishDraftCommand cmd) {
