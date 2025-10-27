@@ -2,10 +2,8 @@ package kdg.be.prog6.kdg.restaurant.adapters.in;
 
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateDishDraftRequest;
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.UpdateDishDraftRequest;
-import kdg.be.prog6.kdg.restaurant.adapters.in.response.DishIdResponse;
-import kdg.be.prog6.kdg.restaurant.adapters.in.response.DraftIdResponse;
-import kdg.be.prog6.kdg.restaurant.adapters.in.response.PendingChangesResponse;
-import kdg.be.prog6.kdg.restaurant.adapters.in.response.PublishAllResponse;
+import kdg.be.prog6.kdg.restaurant.adapters.in.response.*;
+import kdg.be.prog6.kdg.restaurant.core.ViewDishDetailsUseCaseImpl;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
@@ -29,8 +27,9 @@ public class DishController {
     private final DiscardDraftPort discardDraftPort;
     private final PublishAllDraftsPort publishAllDraftsPort;
     private final GetPendingChangesPort getPendingChangesPort;
+    private final ViewDishDetailsUseCaseImpl viewDishDetailsUseCase;
 
-    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort, PublishAllDraftsPort publishAllDraftsPort, GetPendingChangesPort getPendingChangesPort) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort, PublishAllDraftsPort publishAllDraftsPort, GetPendingChangesPort getPendingChangesPort, ViewDishDetailsUseCaseImpl viewDishDetailsUseCase) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;
         this.unpublishDishPort = unpublishDishPort;
@@ -41,6 +40,7 @@ public class DishController {
         this.discardDraftPort = discardDraftPort;
         this.publishAllDraftsPort = publishAllDraftsPort;
         this.getPendingChangesPort = getPendingChangesPort;
+        this.viewDishDetailsUseCase = viewDishDetailsUseCase;
     }
 
     @PostMapping("/drafts")
@@ -159,4 +159,16 @@ public class DishController {
                 DishId.from(dishId)
         ));return ResponseEntity.noContent().build();
    }
+
+    @GetMapping("/{dishId}/details")
+    public ResponseEntity<DishDetailsResponse> getDishDetails(
+            @PathVariable UUID dishId,
+            @RequestParam UUID restaurantId
+    ) {
+        DishDetailsResponse response = viewDishDetailsUseCase.getDishDetails(
+                RestaurantId.from(restaurantId),
+                DishId.from(dishId)
+        );
+        return ResponseEntity.ok(response);
+    }
 }

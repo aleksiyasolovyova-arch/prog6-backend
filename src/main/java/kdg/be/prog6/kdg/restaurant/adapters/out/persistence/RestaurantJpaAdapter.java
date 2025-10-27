@@ -5,6 +5,7 @@ import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -33,5 +34,12 @@ public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
             );
         }
         return Optional.ofNullable(mapper.toDomain(entity.get()));
+    }
+
+    @Override
+    public List<Restaurant> findAll() {
+        return jpaRepo.findAll().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

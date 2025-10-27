@@ -76,6 +76,7 @@ public class Dish {
     public String getName() { return details.name(); }
     public Money getPrice() { return details.price(); }
     public DishType getType() { return details.type(); }
+    public Set<FoodTag> getFoodTags() {return details.foodTags();}
     public String getDescription() { return details.description(); }
     public String getPictureUrl() { return details.pictureUrl(); }
 
