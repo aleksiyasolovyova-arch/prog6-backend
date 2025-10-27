@@ -1,4 +1,4 @@
-package kdg.be.prog6.kdg.restaurant.domain.exceptions;
+package kdg.be.prog6.kdg.common;
 
 public class RestaurantNotFoundException extends RuntimeException {
     public RestaurantNotFoundException(String message) {

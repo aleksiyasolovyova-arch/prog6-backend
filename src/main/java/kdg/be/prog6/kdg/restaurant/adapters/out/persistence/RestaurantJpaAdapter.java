@@ -2,7 +2,7 @@ package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

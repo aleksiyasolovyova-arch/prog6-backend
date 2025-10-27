@@ -4,7 +4,7 @@ import kdg.be.prog6.kdg.restaurant.adapters.in.response.MenuResponse;
 import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

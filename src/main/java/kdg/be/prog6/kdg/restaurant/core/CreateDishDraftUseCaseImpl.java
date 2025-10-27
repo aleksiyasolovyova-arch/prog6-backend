@@ -2,11 +2,10 @@ package kdg.be.prog6.kdg.restaurant.core;
 
 import jakarta.transaction.Transactional;
 import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
-import kdg.be.prog6.kdg.restaurant.domain.DishDetails;
 import kdg.be.prog6.kdg.restaurant.domain.DishDraft;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftCommand;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDishDraftPort;
 import org.springframework.stereotype.Service;

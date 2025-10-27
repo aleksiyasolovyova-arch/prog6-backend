@@ -1,5 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.domain;
 
+import kdg.be.prog6.kdg.common.DishNotFoundException;
 import kdg.be.prog6.kdg.common.events.*;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.*;
 import org.jmolecules.event.types.DomainEvent;

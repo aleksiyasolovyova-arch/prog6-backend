@@ -5,7 +5,7 @@ import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepository
 import kdg.be.prog6.kdg.restaurant.domain.DishDraft;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDraftForEditingCommand;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateDraftForEditingPort;
 import org.springframework.stereotype.Service;

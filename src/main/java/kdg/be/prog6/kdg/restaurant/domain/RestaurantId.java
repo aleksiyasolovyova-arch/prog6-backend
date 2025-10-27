@@ -1,7 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.domain;
 
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.OwnerNotFoundException;
-import kdg.be.prog6.kdg.restaurant.domain.exceptions.RestaurantNotFoundException;
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 
 import java.util.UUID;
 
