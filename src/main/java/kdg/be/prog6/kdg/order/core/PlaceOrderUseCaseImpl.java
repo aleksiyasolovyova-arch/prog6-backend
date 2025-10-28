@@ -2,9 +2,7 @@ package kdg.be.prog6.kdg.order.core;
 
 import jakarta.transaction.Transactional;
 import kdg.be.prog6.kdg.common.DishNotAvailableException;
-import kdg.be.prog6.kdg.order.domain.Order;
-import kdg.be.prog6.kdg.order.domain.OrderId;
-import kdg.be.prog6.kdg.order.domain.OrderLine;
+import kdg.be.prog6.kdg.order.domain.*;
 import kdg.be.prog6.kdg.order.ports.in.PlaceOrderCommand;
 import kdg.be.prog6.kdg.order.ports.in.PlaceOrderPort;
 import kdg.be.prog6.kdg.order.ports.out.DishView;
@@ -36,20 +34,29 @@ public class PlaceOrderUseCaseImpl implements PlaceOrderPort {
             throw new RestaurantNotFoundException("Restaurant not found");
         }
 
-        List<OrderLine> orderLines = cmd.items().stream()
+        var orderLines = cmd.items().stream()
                 .map(item -> validateAndSnapshot(menu, item))
                 .collect(Collectors.toList());
 
+        CustomerInfo customerInfo = new CustomerInfo(
+                cmd.customerName(),
+                new DeliveryAddress(
+                        cmd.deliveryAddress().street(),
+                        cmd.deliveryAddress().number(),
+                        cmd.deliveryAddress().postalCode(),
+                        cmd.deliveryAddress().city(),
+                        cmd.deliveryAddress().country()
+                ),
+                cmd.customerEmail()
+        );
         Order order = Order.create(
                 OrderId.generate(),
-                cmd.customerId(),
+                customerInfo,
                 cmd.restaurantId(),
                 menu.restaurantName(),
                 orderLines
         );
-
         orderRepository.save(order);
-
         return order.getId();
     }
 

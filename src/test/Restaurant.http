@@ -1,0 +1,148 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### Create Restaurant
+POST {{baseUrl}}/api/restaurants
+Content-Type: application/json
+
+{
+  "ownerId": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Le Gourmet",
+  "address": {
+    "street": "Rue de Paris",
+    "city": "Brussels",
+    "postalCode": "1000"
+  },
+  "contactEmail": "info@restaurant.com",
+  "pictureUrls": ["https://example.com/pic1.jpg"],
+  "defaultPreparationTimeMinutes": 30,
+  "cuisineType": "ITALIAN",
+  "openingHours": {
+    "monday": "09:00-18:00",
+    "tuesday": "09:00-18:00",
+    "wednesday": "09:00-18:00",
+    "thursday": "09:00-18:00",
+    "friday": "09:00-18:00",
+    "saturday": "10:00-16:00",
+    "sunday": ""
+  }
+}
+
+> {%
+    client.test("Restaurant created successfully", function() {
+        client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
+    });
+
+    // Extract the restaurantId from response
+    var restaurantId = response.body.id;
+    client.global.set("restaurantId", restaurantId);
+    client.log("Restaurant ID saved: " + restaurantId);
+%}
+
+### Create a Draft
+POST {{baseUrl}}/api/dishes/drafts
+Content-Type: application/json
+
+{
+  "restaurantId": "{{restaurantId}}",
+  "name": "Coq au Vin",
+  "type": "MAIN",
+  "foodTags": ["vegan", "gluten_free"],
+  "description": "Traditional French chicken stew cooked in red wine",
+  "priceAmount": 24.50,
+  "priceCurrency": "EUR",
+  "pictureUrl": "https://example.com/coq-au-vin.jpg"
+}
+
+> {%
+    client.test("Draft created successfully", function() {
+        client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
+    });
+
+    // Extract the draftId from response
+    var draftId = response.body.id || response.body.draftId;
+
+    client.global.set("draftId", draftId);
+
+    client.log("Draft ID saved: " + draftId);
+%}
+
+### Publish dish
+POST {{baseUrl}}/api/dishes/drafts/{{draftId}}/publish?restaurantId={{restaurantId}}
+Content-Type: application/json
+
+> {%
+    client.test("Draft published successfully", function() {
+        client.assert(response.status === 200 || response.status === 204, "Expected successful response");
+    });
+
+    var dishId = response.body.id || response.body.dishId;
+    client.global.set("dishId", dishId);
+    client.log("Dish ID saved after publish: " + dishId);
+%}
+
+
+### Unpublish a dish
+DELETE {{baseUrl}}/api/dishes/{{dishId}}/unpublish?restaurantId={{restaurantId}}
+
+### Mark out of stock
+POST {{baseUrl}}/api/dishes/{{dishId}}/out-of-stock?restaurantId={{restaurantId}}
+Content-Type: application/json
+
+### Mark in stock
+POST {{baseUrl}}/api/dishes/{{dishId}}/in-stock?restaurantId={{restaurantId}}
+Content-Type: application/json
+
+### Check pending changes
+GET {{baseUrl}}/api/dishes/pending-changes?restaurantId={{restaurantId}}
+
+### Publish all at once
+POST {{baseUrl}}/api/dishes/publish-all?restaurantId={{restaurantId}}
+
+### Get all restaurants
+GET {{baseUrl}}/api/restaurants
+Content-Type: application/json
+
+### Get Restaurant's details
+GET {{baseUrl}}/api/restaurants/{{restaurantId}}
+Content-Type: application/json
+
+### Get Menu
+GET {{baseUrl}}/api/restaurants/{{restaurantId}}/menu
+Content-Type: application/json
+
+### Get Dish's details
+GET {{baseUrl}}/api/dishes/{{dishId}}/details?restaurantId={{restaurantId}}
+Content-Type: application/json
+
+### Place order in theory
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "customerEmail": "john@example.com",
+  "deliveryAddress": {
+    "street": "Rue de la Paix",
+    "number": "42",
+    "postalCode": "1000",
+    "city": "Brussels",
+    "country": "Belgium"
+  },
+  "restaurantId": "{{restaurantId}}",
+  "items": [
+    {
+      "dishId": "{{dishId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
+    });
+
+    client.global.set("orderId", response.body.id);
+%}

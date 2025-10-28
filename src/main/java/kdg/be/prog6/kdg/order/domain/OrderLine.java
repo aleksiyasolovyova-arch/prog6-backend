@@ -21,6 +21,20 @@ public class OrderLine {
         return line;
     }
 
+    public static OrderLine reconstitute(
+            UUID dishId,
+            String dishName,
+            BigDecimal priceAtOrderTime,
+            int quantity
+    ) {
+        OrderLine line = new OrderLine();
+        line.dishId = dishId;
+        line.dishName = dishName;
+        line.priceAtOrderTime = priceAtOrderTime;
+        line.quantity = quantity;
+        return line;
+    }
+
     public BigDecimal getTotalPrice() {
         return priceAtOrderTime.multiply(BigDecimal.valueOf(quantity));
     }

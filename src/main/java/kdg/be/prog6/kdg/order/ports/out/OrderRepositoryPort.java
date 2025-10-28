@@ -11,5 +11,4 @@ public interface OrderRepositoryPort {
     void save(Order order);
     Optional<Order> findById(OrderId orderId);
     List<Order> findByRestaurantId(UUID restaurantId);
-    List<Order> findByCustomerId(UUID customerId);
 }

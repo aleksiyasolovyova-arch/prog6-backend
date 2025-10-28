@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
-public record CreateDishDraftRequest(String restaurantId,
+public record CreateDishDraftRequest(UUID restaurantId,
                                      String name,
                                      String type,
                                      Set<String> foodTags,
@@ -18,6 +18,7 @@ public record CreateDishDraftRequest(String restaurantId,
 ) {
 
     public CreateDishDraftCommand toCommand() {
+
         // Convert tag names to enum
         Set<FoodTag> tags = foodTags != null
                 ? foodTags.stream()
@@ -35,7 +36,7 @@ public record CreateDishDraftRequest(String restaurantId,
         );
 
         return new CreateDishDraftCommand(
-                RestaurantId.from(UUID.fromString(restaurantId)),
+                RestaurantId.from(restaurantId),
                 details
         );
     }

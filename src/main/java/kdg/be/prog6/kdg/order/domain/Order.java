@@ -1,5 +1,7 @@
 package kdg.be.prog6.kdg.order.domain;
 
+import kdg.be.prog6.kdg.order.domain.exceptions.InvalidOrderStateException;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,7 +10,7 @@ import java.util.UUID;
 
 public class Order {
     private OrderId orderId;
-    private UUID customerId;
+    private CustomerInfo customerInfo;
     private UUID restaurantId;
     private String restaurantName;
 
@@ -22,14 +24,14 @@ public class Order {
 
     public static Order create(
             OrderId orderId,
-            UUID customerId,
+            CustomerInfo customerInfo,
             UUID restaurantId,
             String restaurantName,
             List<OrderLine> orderLines
     ) {
         Order order = new Order();
         order.orderId = orderId;
-        order.customerId = customerId;
+        order.customerInfo = customerInfo;
         order.restaurantId = restaurantId;
         order.restaurantName = restaurantName;
         order.orderLines = new ArrayList<>(orderLines);
@@ -63,9 +65,35 @@ public class Order {
         this.estimatedReadyAt = LocalDateTime.now();
     }
 
+    public static Order reconstitute(
+            OrderId orderId,
+            CustomerInfo customerInfo,
+            UUID restaurantId,
+            String restaurantName,
+            List<OrderLine> orderLines,
+            OrderStatus status,
+            BigDecimal totalAmount,
+            LocalDateTime orderedAt,
+            LocalDateTime estimatedReadyAt
+    ) {
+        Order order = new Order();
+        order.orderId = orderId;
+        order.customerInfo = customerInfo;
+        order.restaurantId = restaurantId;
+        order.restaurantName = restaurantName;
+        order.orderLines = new ArrayList<>(orderLines);
+        order.status = status;
+        order.totalAmount = totalAmount;
+        order.orderedAt = orderedAt;
+        order.estimatedReadyAt = estimatedReadyAt;
+        return order;
+    }
+
     // Getters
     public OrderId getId() { return orderId; }
-    public UUID getCustomerId() { return customerId; }
+    public CustomerInfo getCustomerInfo() {
+        return customerInfo;
+    }
     public UUID getRestaurantId() { return restaurantId; }
     public String getRestaurantName() { return restaurantName; }
     public List<OrderLine> getOrderLines() { return new ArrayList<>(orderLines); }

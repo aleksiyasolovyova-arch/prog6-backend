@@ -119,6 +119,40 @@ CREATE INDEX idx_dish_drafts_restaurant_id ON dish_drafts(restaurant_id);
 CREATE INDEX idx_dish_drafts_original_dish_id ON dish_drafts(original_dish_id);
 CREATE INDEX idx_dish_drafts_scheduled ON dish_drafts(scheduled_publish_at);
 
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+                                      id UUID PRIMARY KEY,
+                                      customer_name VARCHAR(255) NOT NULL,
+                                      customer_email VARCHAR(255) NOT NULL,
+                                      delivery_street VARCHAR(255) NOT NULL,
+                                      delivery_number VARCHAR(50) NOT NULL,
+                                      delivery_postal_code VARCHAR(20) NOT NULL,
+                                      delivery_city VARCHAR(100) NOT NULL,
+                                      delivery_country VARCHAR(100) NOT NULL,
+                                      restaurant_id UUID NOT NULL,
+                                      restaurant_name VARCHAR(255) NOT NULL,
+                                      status VARCHAR(50) NOT NULL,
+                                      total_amount DECIMAL(10, 2) NOT NULL,
+                                      ordered_at TIMESTAMP NOT NULL,
+                                      estimated_ready_at TIMESTAMP
+);
+
+-- Order lines table
+CREATE TABLE IF NOT EXISTS order_lines (
+                                           id UUID PRIMARY KEY,
+                                           order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+                                           dish_id UUID NOT NULL,
+                                           dish_name VARCHAR(255) NOT NULL,
+                                           price_at_order_time DECIMAL(10, 2) NOT NULL,
+                                           quantity INTEGER NOT NULL
+);
+
+-- Indexes
+CREATE INDEX idx_orders_restaurant ON orders(restaurant_id);
+CREATE INDEX idx_orders_customer_email ON orders(customer_email);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_order_lines_order ON order_lines(order_id);
+
 -- ========================================
 -- DOMAIN EVENTS TABLE (for event sourcing/audit)
 -- ========================================
