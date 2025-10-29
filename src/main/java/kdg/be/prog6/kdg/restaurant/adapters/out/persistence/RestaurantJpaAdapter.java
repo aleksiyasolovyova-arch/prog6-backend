@@ -3,6 +3,8 @@ package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
+import org.jmolecules.event.types.DomainEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,17 +14,21 @@ import java.util.Optional;
 public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
     private final RestaurantJpaRepository jpaRepo;
     private final RestaurantMapper mapper;
+    private final ApplicationEventPublisher eventPublisher;
 
 
-    public RestaurantJpaAdapter(RestaurantJpaRepository jpaRepo, RestaurantMapper mapper) {
+    public RestaurantJpaAdapter(RestaurantJpaRepository jpaRepo, RestaurantMapper mapper, ApplicationEventPublisher eventPublisher) {
         this.jpaRepo = jpaRepo;
         this.mapper = mapper;
+        this.eventPublisher = eventPublisher;
     }
     @Override
     public void save(Restaurant restaurant) {
         var entity = mapper.toEntity(restaurant);
         var saved = jpaRepo.save(entity);
         mapper.updateDomain(restaurant, saved);
+
+        publishDomainEvents(restaurant);
     }
 
     @Override
@@ -41,5 +47,15 @@ public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
         return jpaRepo.findAll().stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    private void publishDomainEvents(Restaurant restaurant) {
+        List<DomainEvent> events = restaurant.getDomainEvents();
+
+        for (DomainEvent event : events) {
+            eventPublisher.publishEvent(event);
+        }
+
+        restaurant.clearDomainEvents();
     }
 }

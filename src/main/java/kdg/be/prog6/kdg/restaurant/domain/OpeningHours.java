@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class OpeningHours {
     private final Map<DayOfWeek, List<TimeRange>> schedule;
 
-    private OpeningHours(Map<DayOfWeek, List<TimeRange>> schedule) {
+    public OpeningHours(Map<DayOfWeek, List<TimeRange>> schedule) {
         this.schedule = copySchedule(schedule);
     }
 
