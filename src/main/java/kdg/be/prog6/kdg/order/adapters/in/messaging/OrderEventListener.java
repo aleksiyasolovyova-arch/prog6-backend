@@ -1,6 +1,7 @@
 package kdg.be.prog6.kdg.order.adapters.in.messaging;
 
 import kdg.be.prog6.kdg.common.events.*;
+import kdg.be.prog6.kdg.order.adapters.out.messaging.DeliveryServicePublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -13,24 +14,24 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 public class OrderEventListener {
     private static final Logger log = LoggerFactory.getLogger(OrderEventListener.class);
+    private final DeliveryServicePublisher deliveryServicePublisher;
+
+    public OrderEventListener(DeliveryServicePublisher deliveryServicePublisher) {
+        this.deliveryServicePublisher = deliveryServicePublisher;
+    }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onOrderPlaced(OrderPlacedEvent event) {
-        log.info("Order {} placed for restaurant {} - total: {}",
-                event.orderId(), event.restaurantId(), event.totalAmount());
-        // TODO: Notify restaurant via RabbitMQ
-        // TODO: Start 5-minute decision deadline timer
+        log.info("Order {} placed - waiting for restaurant decision", event.orderId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onOrderAccepted(OrderAcceptedEvent event) {
-        log.info("Order {} accepted at {}", event.orderId(), event.acceptedAt());
-        // TODO: Notify delivery service via RabbitMQ
-        // TODO: Update order kitchen status
+        log.info("Order {} accepted - kitchen starting preparation", event.orderId());
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -38,16 +39,20 @@ public class OrderEventListener {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onOrderRejected(OrderRejectedEvent event) {
         log.info("Order {} rejected - reason: {}", event.orderId(), event.rejectionReason());
-        // TODO: Notify customer
-        // TODO: Release reservation
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onOrderReadyForPickup(OrderReadyForPickupEvent event) {
-        log.info("Order {} ready for pickup", event.orderId());
-        // TODO: Notify delivery service via RabbitMQ to collect order
+        log.info("Order {} ready for pickup - notifying delivery service", event.orderId());
+
+        try {
+            deliveryServicePublisher.publishOrderReady(event);
+        } catch (Exception e) {
+            log.error("Failed to notify delivery service for order {}", event.orderId(), e);
+            // In production, retry or log to a dead letter queue
+        }
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)

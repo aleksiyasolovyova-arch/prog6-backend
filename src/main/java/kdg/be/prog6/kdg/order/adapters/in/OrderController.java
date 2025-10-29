@@ -5,9 +5,12 @@ import kdg.be.prog6.kdg.common.DishNotFoundException;
 import kdg.be.prog6.kdg.order.adapters.in.request.PlaceOrderDto;
 import kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse;
 import kdg.be.prog6.kdg.order.core.AcceptOrderUseCaseImpl;
+import kdg.be.prog6.kdg.order.core.MarkOrderReadyUseCaseImpl;
 import kdg.be.prog6.kdg.order.core.RejectOrderUseCaseImpl;
 import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.OrderId;
+import kdg.be.prog6.kdg.order.domain.exceptions.OrderNotFoundException;
+import kdg.be.prog6.kdg.order.domain.exceptions.UnauthorizedRestaurantException;
 import kdg.be.prog6.kdg.order.ports.in.*;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
 import org.springframework.http.HttpStatus;
@@ -28,14 +31,16 @@ public class OrderController {
     private final RejectOrderPort rejectOrderService;
     private final GetOrderDetailsPort orderDetailsService;
     private final GetRestaurantOrdersPort restaurantOrdersService;
+    private final MarkOrderReadyPort markOrderReadyService;
     private final OrderRepositoryPort orderRepository;
 
-    public OrderController(PlaceOrderPort placeOrderPort, AcceptOrderUseCaseImpl acceptOrderService, RejectOrderUseCaseImpl rejectOrderService, GetOrderDetailsPort orderDetailsService, GetRestaurantOrdersPort restaurantOrdersService, OrderRepositoryPort orderRepository) {
+    public OrderController(PlaceOrderPort placeOrderPort, AcceptOrderUseCaseImpl acceptOrderService, RejectOrderUseCaseImpl rejectOrderService, GetOrderDetailsPort orderDetailsService, GetRestaurantOrdersPort restaurantOrdersService, MarkOrderReadyPort markOrderReadyService, OrderRepositoryPort orderRepository) {
         this.placeOrderPort = placeOrderPort;
         this.acceptOrderService = acceptOrderService;
         this.rejectOrderService = rejectOrderService;
         this.orderDetailsService = orderDetailsService;
         this.restaurantOrdersService = restaurantOrdersService;
+        this.markOrderReadyService = markOrderReadyService;
         this.orderRepository = orderRepository;
     }
 
@@ -66,6 +71,7 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    //TODO: Implement the rejection of order request dto+its reason
     @PostMapping("/{orderId}/reject")
     public ResponseEntity<Void> rejectOrder(
             @PathVariable UUID orderId,
@@ -76,6 +82,31 @@ public class OrderController {
                 new RejectOrderCommand(OrderId.from(orderId), restaurantId)
         );
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{orderId}/ready")
+    public ResponseEntity<OrderResponse> markOrderReady(
+            @PathVariable UUID orderId,
+            @RequestParam UUID restaurantId
+    ) {
+        try {
+            // Call use case to mark order as ready
+            markOrderReadyService.markOrderReady(
+                    new MarkOrderReadyCommand(OrderId.from(orderId), restaurantId)
+            );
+
+            // Fetch updated order and return
+            Order order = orderRepository.findById(OrderId.from(orderId))
+                    .orElseThrow(() -> new RuntimeException("Order not found"));
+
+            return ResponseEntity.ok(mapToResponse(order));
+        } catch (UnauthorizedRestaurantException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (OrderNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("/{orderId}")
