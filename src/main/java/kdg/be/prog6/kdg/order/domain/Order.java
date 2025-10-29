@@ -49,8 +49,6 @@ public class Order {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.orderedAt = LocalDateTime.now();
         order.decisionDeadline = LocalDateTime.now().plusMinutes(5);
-
-        // Register OrderPlacedEvent
         order.registerEvent(new OrderPlacedEvent(
                 order.orderId.uuid(),
                 restaurantId,
@@ -187,7 +185,8 @@ public class Order {
             OrderStatus status,
             BigDecimal totalAmount,
             LocalDateTime orderedAt,
-            LocalDateTime estimatedReadyAt
+            LocalDateTime estimatedReadyAt,
+            LocalDateTime decisionDeadline
     ) {
         Order order = new Order();
         order.orderId = orderId;
@@ -199,6 +198,7 @@ public class Order {
         order.totalAmount = totalAmount;
         order.orderedAt = orderedAt;
         order.estimatedReadyAt = estimatedReadyAt;
+        order.decisionDeadline = decisionDeadline;
         return order;
     }
 

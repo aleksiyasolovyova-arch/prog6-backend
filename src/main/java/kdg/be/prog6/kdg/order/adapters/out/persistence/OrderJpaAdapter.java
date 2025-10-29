@@ -2,6 +2,7 @@ package kdg.be.prog6.kdg.order.adapters.out.persistence;
 
 import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.OrderId;
+import kdg.be.prog6.kdg.order.domain.OrderStatus;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
 import org.jmolecules.event.types.DomainEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -52,5 +53,12 @@ public class OrderJpaAdapter implements OrderRepositoryPort {
         }
 
         order.clearDomainEvents();
+    }
+
+    @Override
+    public List<Order> findByStatus(OrderStatus status) {
+        return jpaRepository.findByStatus(status).stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 }

@@ -28,6 +28,7 @@ public class OrderMapper {
         entity.setStatus(order.getStatus());
         entity.setTotalAmount(order.getTotalAmount());
         entity.setOrderedAt(order.getOrderedAt());
+        entity.setDecisionDeadline(order.getDecisionDeadline());
         entity.setEstimatedReadyAt(order.getEstimatedReadyAt());
 
         entity.setOrderLines(
@@ -63,7 +64,8 @@ public class OrderMapper {
                 entity.getStatus(),
                 entity.getTotalAmount(),
                 entity.getOrderedAt(),
-                entity.getEstimatedReadyAt()
+                entity.getEstimatedReadyAt(),
+                entity.getDecisionDeadline()
         );
     }
 

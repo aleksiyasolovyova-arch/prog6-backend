@@ -60,6 +60,9 @@ public class OrderEntity {
     @Column(name = "estimated_ready_at")
     private LocalDateTime estimatedReadyAt;
 
+    @Column(name = "decision_deadline")
+    private LocalDateTime decisionDeadline;
+
     public UUID getId() {
         return id;
     }
@@ -178,5 +181,13 @@ public class OrderEntity {
 
     public void setEstimatedReadyAt(LocalDateTime estimatedReadyAt) {
         this.estimatedReadyAt = estimatedReadyAt;
+    }
+
+    public LocalDateTime getDecisionDeadline() {
+        return decisionDeadline;
+    }
+
+    public void setDecisionDeadline(LocalDateTime decisionDeadline) {
+        this.decisionDeadline = decisionDeadline;
     }
 }

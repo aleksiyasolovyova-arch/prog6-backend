@@ -153,6 +153,8 @@ CREATE INDEX idx_orders_customer_email ON orders(customer_email);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_order_lines_order ON order_lines(order_id);
 
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS decision_deadline TIMESTAMP;
+
 -- ========================================
 -- DOMAIN EVENTS TABLE (for event sourcing/audit)
 -- ========================================
