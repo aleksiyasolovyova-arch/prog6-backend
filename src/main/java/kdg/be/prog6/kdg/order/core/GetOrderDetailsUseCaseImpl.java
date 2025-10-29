@@ -6,8 +6,10 @@ import kdg.be.prog6.kdg.order.domain.OrderId;
 import kdg.be.prog6.kdg.order.domain.exceptions.OrderNotFoundException;
 import kdg.be.prog6.kdg.order.ports.in.GetOrderDetailsPort;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Service
 public class GetOrderDetailsUseCaseImpl implements GetOrderDetailsPort {
     private final OrderRepositoryPort orderRepository;
 
