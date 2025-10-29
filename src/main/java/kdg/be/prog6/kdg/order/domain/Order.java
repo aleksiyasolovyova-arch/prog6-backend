@@ -1,6 +1,8 @@
 package kdg.be.prog6.kdg.order.domain;
 
+import kdg.be.prog6.kdg.common.events.*;
 import kdg.be.prog6.kdg.order.domain.exceptions.InvalidOrderStateException;
+import org.jmolecules.event.types.DomainEvent;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +21,12 @@ public class Order {
     private BigDecimal totalAmount;
     private LocalDateTime orderedAt;
     private LocalDateTime estimatedReadyAt;
+    private LocalDateTime acceptedAt;
+    private LocalDateTime readyAt;
+    private String rejectionReason;
+    private LocalDateTime decisionDeadline;
+
+    private List<DomainEvent> events = new ArrayList<>();
 
     private Order() {}
 
@@ -40,6 +48,17 @@ public class Order {
                 .map(OrderLine::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         order.orderedAt = LocalDateTime.now();
+        order.decisionDeadline = LocalDateTime.now().plusMinutes(5);
+
+        // Register OrderPlacedEvent
+        order.registerEvent(new OrderPlacedEvent(
+                order.orderId.uuid(),
+                restaurantId,
+                order.orderedAt,
+                order.decisionDeadline,
+                order.totalAmount
+        ));
+
         return order;
     }
 
@@ -48,13 +67,45 @@ public class Order {
             throw new InvalidOrderStateException("Order is not pending");
         }
         this.status = OrderStatus.ACCEPTED;
+        this.acceptedAt = LocalDateTime.now();
+
+        registerEvent(new OrderAcceptedEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                this.acceptedAt
+        ));
     }
 
-    public void reject() {
+    public void reject(String reason) {
         if (status != OrderStatus.PENDING) {
             throw new InvalidOrderStateException("Order is not pending");
         }
         this.status = OrderStatus.REJECTED;
+        this.rejectionReason = reason;
+
+        registerEvent(new OrderRejectedEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                reason,
+                LocalDateTime.now()
+        ));
+    }
+
+    /**
+     * Called by a scheduled job/service after 5 minutes
+     * if no accept/reject decision was made
+     */
+    public void autoDecline() {
+        if (status != OrderStatus.PENDING) {
+            throw new InvalidOrderStateException("Order is not pending");
+        }
+        this.status = OrderStatus.DECLINED;
+
+        registerEvent(new OrderAutoDeclinedEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                LocalDateTime.now()
+        ));
     }
 
     public void markReady() {
@@ -62,7 +113,69 @@ public class Order {
             throw new InvalidOrderStateException("Order is not accepted");
         }
         this.status = OrderStatus.READY;
-        this.estimatedReadyAt = LocalDateTime.now();
+        this.readyAt = LocalDateTime.now();
+        this.estimatedReadyAt = this.readyAt;
+
+        registerEvent(new OrderReadyForPickupEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                this.readyAt
+        ));
+    }
+
+    /**
+     * Called when delivery service picks up the order
+     * Comes from RabbitMQ message
+     */
+    public void markPickedUp(String courierId) {
+        if (status != OrderStatus.READY) {
+            throw new InvalidOrderStateException("Order is not ready for pickup");
+        }
+        this.status = OrderStatus.PICKED_UP;
+
+        registerEvent(new OrderPickedUpEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                LocalDateTime.now(),
+                courierId
+        ));
+    }
+
+    /**
+     * Called when delivery service confirms delivery
+     * Comes from RabbitMQ message
+     */
+    public void markDelivered() {
+        if (status != OrderStatus.PICKED_UP) {
+            throw new InvalidOrderStateException("Order is not picked up");
+        }
+        this.status = OrderStatus.DELIVERED;
+
+        registerEvent(new OrderDeliveredEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                LocalDateTime.now()
+        ));
+    }
+
+    /**
+     * Called when a dish in the order becomes unavailable
+     * during checkout or after order was placed
+     */
+    public void invalidate(String reason) {
+        if (status.equals(OrderStatus.DELIVERED) ||
+                status.equals(OrderStatus.REJECTED) ||
+                status.equals(OrderStatus.INVALID)) {
+            throw new InvalidOrderStateException("Cannot invalidate order in status: " + status);
+        }
+        this.status = OrderStatus.INVALID;
+
+        registerEvent(new OrderInvalidatedEvent(
+                this.orderId.uuid(),
+                this.restaurantId,
+                reason,
+                LocalDateTime.now()
+        ));
     }
 
     public static Order reconstitute(
@@ -89,6 +202,18 @@ public class Order {
         return order;
     }
 
+    private void registerEvent(DomainEvent event) {
+        events.add(event);
+    }
+
+    public List<DomainEvent> getDomainEvents() {
+        return new ArrayList<>(events);
+    }
+
+    public void clearDomainEvents() {
+        events.clear();
+    }
+
     // Getters
     public OrderId getId() { return orderId; }
     public CustomerInfo getCustomerInfo() {
@@ -101,4 +226,8 @@ public class Order {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public LocalDateTime getOrderedAt() { return orderedAt; }
     public LocalDateTime getEstimatedReadyAt() { return estimatedReadyAt; }
+    public LocalDateTime getAcceptedAt() { return acceptedAt; }
+    public LocalDateTime getReadyAt() { return readyAt; }
+    public String getRejectionReason() { return rejectionReason; }
+    public LocalDateTime getDecisionDeadline() { return decisionDeadline; }
 }

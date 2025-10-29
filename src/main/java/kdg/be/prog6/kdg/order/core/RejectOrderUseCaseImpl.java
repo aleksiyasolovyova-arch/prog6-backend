@@ -26,7 +26,7 @@ public class RejectOrderUseCaseImpl implements RejectOrderPort {
             throw new UnauthorizedException("Order does not belong to this restaurant");
         }
 
-        order.reject();
+        order.reject("");
         orderRepository.save(order);
     }
 
