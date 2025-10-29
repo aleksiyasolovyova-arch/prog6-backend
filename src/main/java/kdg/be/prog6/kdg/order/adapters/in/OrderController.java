@@ -8,16 +8,14 @@ import kdg.be.prog6.kdg.order.core.AcceptOrderUseCaseImpl;
 import kdg.be.prog6.kdg.order.core.RejectOrderUseCaseImpl;
 import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.OrderId;
-import kdg.be.prog6.kdg.order.ports.in.AcceptOrderCommand;
-import kdg.be.prog6.kdg.order.ports.in.PlaceOrderCommand;
-import kdg.be.prog6.kdg.order.ports.in.PlaceOrderPort;
-import kdg.be.prog6.kdg.order.ports.in.RejectOrderCommand;
+import kdg.be.prog6.kdg.order.ports.in.*;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Repository;
+
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse.mapToResponse;
@@ -26,14 +24,18 @@ import static kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse.mapToRes
 @RequestMapping("/api/orders")
 public class OrderController {
     private final PlaceOrderPort placeOrderPort;
-    private final AcceptOrderUseCaseImpl acceptOrderService;
-    private final RejectOrderUseCaseImpl rejectOrderService;
+    private final AcceptOrderPort acceptOrderService;
+    private final RejectOrderPort rejectOrderService;
+    private final GetOrderDetailsPort orderDetailsService;
+    private final GetRestaurantOrdersPort restaurantOrdersService;
     private final OrderRepositoryPort orderRepository;
 
-    public OrderController(PlaceOrderPort placeOrderPort, AcceptOrderUseCaseImpl acceptOrderService, RejectOrderUseCaseImpl rejectOrderService, OrderRepositoryPort orderRepository) {
+    public OrderController(PlaceOrderPort placeOrderPort, AcceptOrderUseCaseImpl acceptOrderService, RejectOrderUseCaseImpl rejectOrderService, GetOrderDetailsPort orderDetailsService, GetRestaurantOrdersPort restaurantOrdersService, OrderRepositoryPort orderRepository) {
         this.placeOrderPort = placeOrderPort;
         this.acceptOrderService = acceptOrderService;
         this.rejectOrderService = rejectOrderService;
+        this.orderDetailsService = orderDetailsService;
+        this.restaurantOrdersService = restaurantOrdersService;
         this.orderRepository = orderRepository;
     }
 
@@ -76,5 +78,19 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    //TODO: Build up the getOrders mapping
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponse> getOrderDetails(@PathVariable UUID orderId) {
+        OrderResponse response = orderDetailsService.getOrderDetails(
+                OrderId.from(orderId)
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<OrderResponse>> getRestaurantOrders(@RequestParam UUID restaurantId) {
+        List<OrderResponse> orders = restaurantOrdersService.getRestaurantOrders(restaurantId);
+        return ResponseEntity.ok(orders);
+    }
+
+
 }

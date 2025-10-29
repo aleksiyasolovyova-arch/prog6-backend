@@ -5,11 +5,12 @@ import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.exceptions.OrderNotFoundException;
 import kdg.be.prog6.kdg.order.domain.exceptions.UnauthorizedException;
 import kdg.be.prog6.kdg.order.ports.in.AcceptOrderCommand;
+import kdg.be.prog6.kdg.order.ports.in.AcceptOrderPort;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AcceptOrderUseCaseImpl {
+public class AcceptOrderUseCaseImpl  implements AcceptOrderPort {
     private final OrderRepositoryPort orderRepository;
 
     public AcceptOrderUseCaseImpl(OrderRepositoryPort orderRepository) {

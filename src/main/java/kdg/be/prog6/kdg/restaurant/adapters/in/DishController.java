@@ -29,8 +29,6 @@ public class DishController {
     private final GetPendingChangesPort getPendingChangesPort;
     private final ViewDishDetailsUseCaseImpl viewDishDetailsUseCase;
 
-
-    //TODO: Move all these in Restaurant Controller, then test out posting and order
     public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort, PublishAllDraftsPort publishAllDraftsPort, GetPendingChangesPort getPendingChangesPort, ViewDishDetailsUseCaseImpl viewDishDetailsUseCase) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;

@@ -35,7 +35,7 @@ Content-Type: application/json
     });
 
     // Extract the restaurantId from response
-    var restaurantId = response.body.id;
+    var restaurantId = response.body.uuid;
     client.global.set("restaurantId", restaurantId);
     client.log("Restaurant ID saved: " + restaurantId);
 %}
@@ -61,7 +61,7 @@ Content-Type: application/json
     });
 
     // Extract the draftId from response
-    var draftId = response.body.id || response.body.draftId;
+    var draftId = response.body.uuid || response.body.draftId;
 
     client.global.set("draftId", draftId);
 
@@ -77,7 +77,7 @@ Content-Type: application/json
         client.assert(response.status === 200 || response.status === 204, "Expected successful response");
     });
 
-    var dishId = response.body.id || response.body.dishId;
+    var dishId = response.body.uuid || response.body.dishId;
     client.global.set("dishId", dishId);
     client.log("Dish ID saved after publish: " + dishId);
 %}
@@ -146,3 +146,9 @@ Content-Type: application/json
 
     client.global.set("orderId", response.body.id);
 %}
+
+
+### Track Order
+GET {{baseUrl}}/api/orders?restaurantId={{restaurantId}}
+
+

@@ -4,12 +4,13 @@ import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.exceptions.OrderNotFoundException;
 import kdg.be.prog6.kdg.order.domain.exceptions.UnauthorizedException;
 import kdg.be.prog6.kdg.order.ports.in.RejectOrderCommand;
+import kdg.be.prog6.kdg.order.ports.in.RejectOrderPort;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class RejectOrderUseCaseImpl {
+public class RejectOrderUseCaseImpl implements RejectOrderPort {
     private final OrderRepositoryPort orderRepository;
 
     public RejectOrderUseCaseImpl(OrderRepositoryPort orderRepository) {
