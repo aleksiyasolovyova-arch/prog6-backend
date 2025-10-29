@@ -1,4 +1,4 @@
-package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
+package kdg.be.prog6.kdg.restaurant.ports.out;
 
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;

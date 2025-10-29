@@ -1,6 +1,6 @@
 package kdg.be.prog6.kdg;
 
-import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
+import kdg.be.prog6.kdg.restaurant.ports.out.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.*;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

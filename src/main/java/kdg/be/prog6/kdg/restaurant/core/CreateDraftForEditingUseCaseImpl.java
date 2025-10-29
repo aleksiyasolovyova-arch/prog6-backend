@@ -1,7 +1,7 @@
 package kdg.be.prog6.kdg.restaurant.core;
 
 import jakarta.transaction.Transactional;
-import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
+import kdg.be.prog6.kdg.restaurant.ports.out.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.DishDraft;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;

@@ -12,6 +12,8 @@ public class OrderLine {
     public OrderLine() {
     }
 
+
+
     public static OrderLine create(UUID dishId, String dishName, BigDecimal price, int quantity) {
         OrderLine line = new OrderLine();
         line.dishId = dishId;

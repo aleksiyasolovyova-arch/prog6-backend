@@ -2,7 +2,7 @@ package kdg.be.prog6.kdg.restaurant.adapters.in;
 
 import kdg.be.prog6.kdg.common.RestaurantBCMenuView;
 import kdg.be.prog6.kdg.common.RestaurantMenuFacade;
-import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
+import kdg.be.prog6.kdg.restaurant.ports.out.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.common.MenuItemView;
 import org.springframework.stereotype.Component;

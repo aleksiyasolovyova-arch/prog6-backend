@@ -1,6 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.adapters.out.scheduler;
 
-import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
+import kdg.be.prog6.kdg.restaurant.ports.out.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.DishDraft;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import org.slf4j.Logger;

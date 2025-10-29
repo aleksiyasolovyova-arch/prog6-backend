@@ -1,7 +1,7 @@
 package kdg.be.prog6.kdg.restaurant.core;
 
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.DishDetailsResponse;
-import kdg.be.prog6.kdg.restaurant.adapters.out.persistence.RestaurantRepositoryPort;
+import kdg.be.prog6.kdg.restaurant.ports.out.RestaurantRepositoryPort;
 import kdg.be.prog6.kdg.restaurant.domain.Dish;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;

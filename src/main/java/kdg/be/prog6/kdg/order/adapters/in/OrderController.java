@@ -6,7 +6,6 @@ import kdg.be.prog6.kdg.order.adapters.in.request.PlaceOrderDto;
 import kdg.be.prog6.kdg.order.adapters.in.request.RejectOrderRequest;
 import kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse;
 import kdg.be.prog6.kdg.order.core.AcceptOrderUseCaseImpl;
-import kdg.be.prog6.kdg.order.core.MarkOrderReadyUseCaseImpl;
 import kdg.be.prog6.kdg.order.core.RejectOrderUseCaseImpl;
 import kdg.be.prog6.kdg.order.domain.Order;
 import kdg.be.prog6.kdg.order.domain.OrderId;
@@ -14,6 +13,8 @@ import kdg.be.prog6.kdg.order.domain.exceptions.OrderNotFoundException;
 import kdg.be.prog6.kdg.order.domain.exceptions.UnauthorizedRestaurantException;
 import kdg.be.prog6.kdg.order.ports.in.*;
 import kdg.be.prog6.kdg.order.ports.out.OrderRepositoryPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -21,12 +22,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 import static kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse.mapToResponse;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
     private final PlaceOrderPort placeOrderPort;
     private final AcceptOrderPort acceptOrderService;
     private final RejectOrderPort rejectOrderService;
@@ -44,6 +45,7 @@ public class OrderController {
         this.markOrderReadyService = markOrderReadyService;
         this.orderRepository = orderRepository;
     }
+
 
     @PostMapping
     public ResponseEntity<OrderResponse> placeOrder(@RequestBody PlaceOrderDto dto) {
