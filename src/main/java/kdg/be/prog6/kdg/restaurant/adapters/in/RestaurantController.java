@@ -1,11 +1,19 @@
 package kdg.be.prog6.kdg.restaurant.adapters.in;
 
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateRestaurantRequest;
+import kdg.be.prog6.kdg.restaurant.adapters.in.request.SchedulePublishAllDraftsRequest;
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.*;
 import kdg.be.prog6.kdg.restaurant.core.*;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
+import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.DishLimitExceededException;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.InvalidScheduleException;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.NoDraftsToPublishException;
 import kdg.be.prog6.kdg.restaurant.ports.in.CreateRestaurantPort;
+import kdg.be.prog6.kdg.restaurant.ports.in.SchedulePublishAllDraftsCommand;
+import kdg.be.prog6.kdg.restaurant.ports.in.SchedulePublishAllDraftsPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +27,14 @@ public class RestaurantController {
     private final BrowseRestaurantsUseCaseImpl browseRestaurantsUseCase;
     private final ViewRestaurantDetailsUseCaseImpl viewRestaurantDetailsUseCase;
     private final ViewMenuUseCaseImpl viewMenuUseCase;
+    private final SchedulePublishAllDraftsPort schedulePublishAllDraftsPort;
 
-    public RestaurantController(CreateRestaurantUseCaseImpl port, BrowseRestaurantsUseCaseImpl browseRestaurantsUseCase, ViewRestaurantDetailsUseCaseImpl viewRestaurantDetailsUseCase, ViewMenuUseCaseImpl viewMenuUseCase) {
+    public RestaurantController(CreateRestaurantUseCaseImpl port, BrowseRestaurantsUseCaseImpl browseRestaurantsUseCase, ViewRestaurantDetailsUseCaseImpl viewRestaurantDetailsUseCase, ViewMenuUseCaseImpl viewMenuUseCase, SchedulePublishAllDraftsPort schedulePublishAllDraftsPort) {
         this.port = port;
         this.browseRestaurantsUseCase = browseRestaurantsUseCase;
         this.viewRestaurantDetailsUseCase = viewRestaurantDetailsUseCase;
         this.viewMenuUseCase = viewMenuUseCase;
+        this.schedulePublishAllDraftsPort = schedulePublishAllDraftsPort;
     }
 
     @PostMapping

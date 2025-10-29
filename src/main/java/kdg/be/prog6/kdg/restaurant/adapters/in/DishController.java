@@ -1,12 +1,17 @@
 package kdg.be.prog6.kdg.restaurant.adapters.in;
 
+import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.CreateDishDraftRequest;
+import kdg.be.prog6.kdg.restaurant.adapters.in.request.SchedulePublishAllDraftsRequest;
 import kdg.be.prog6.kdg.restaurant.adapters.in.request.UpdateDishDraftRequest;
 import kdg.be.prog6.kdg.restaurant.adapters.in.response.*;
 import kdg.be.prog6.kdg.restaurant.core.ViewDishDetailsUseCaseImpl;
 import kdg.be.prog6.kdg.restaurant.domain.DishId;
 import kdg.be.prog6.kdg.restaurant.domain.DraftId;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.DishLimitExceededException;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.InvalidScheduleException;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.NoDraftsToPublishException;
 import kdg.be.prog6.kdg.restaurant.ports.in.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +33,9 @@ public class DishController {
     private final PublishAllDraftsPort publishAllDraftsPort;
     private final GetPendingChangesPort getPendingChangesPort;
     private final ViewDishDetailsUseCaseImpl viewDishDetailsUseCase;
+    private final SchedulePublishAllDraftsPort schedulePublishAllDraftsPort;
 
-    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort, PublishAllDraftsPort publishAllDraftsPort, GetPendingChangesPort getPendingChangesPort, ViewDishDetailsUseCaseImpl viewDishDetailsUseCase) {
+    public DishController(CreateDishDraftPort dishDraftPort, PublishDishPort publishDishPort, UnpublishDishPort unpublishDishPort, MarkOutOfStockPort markOutOfStockPort, MarkInStockPort markInStockPort, CreateDraftForEditingPort createDraftForEditingPort, EditDishDraftPort editDishDraftPort, DiscardDraftPort discardDraftPort, PublishAllDraftsPort publishAllDraftsPort, GetPendingChangesPort getPendingChangesPort, ViewDishDetailsUseCaseImpl viewDishDetailsUseCase, SchedulePublishAllDraftsPort schedulePublishAllDraftsPort) {
         this.dishDraftPort = dishDraftPort;
         this.publishDishPort = publishDishPort;
         this.unpublishDishPort = unpublishDishPort;
@@ -41,6 +47,7 @@ public class DishController {
         this.publishAllDraftsPort = publishAllDraftsPort;
         this.getPendingChangesPort = getPendingChangesPort;
         this.viewDishDetailsUseCase = viewDishDetailsUseCase;
+        this.schedulePublishAllDraftsPort = schedulePublishAllDraftsPort;
     }
 
     @PostMapping("/drafts")
@@ -171,4 +178,30 @@ public class DishController {
         );
         return ResponseEntity.ok(response);
     }
+
+
+    @PostMapping("/{restaurantId}/dishes/schedule-publish-all")
+    public ResponseEntity<Void> schedulePublishAllDrafts(
+            @PathVariable UUID restaurantId,
+            @RequestBody SchedulePublishAllDraftsRequest request) {
+
+        try {
+            SchedulePublishAllDraftsCommand command = new SchedulePublishAllDraftsCommand(
+                    restaurantId,
+                    request.publishAt()
+            );
+
+            schedulePublishAllDraftsPort.schedulePublishAllDrafts(command);
+
+            return ResponseEntity.ok().build();
+
+        } catch (InvalidScheduleException | NoDraftsToPublishException | DishLimitExceededException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RestaurantNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package kdg.be.prog6.kdg.restaurant.domain;
 
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.InvalidDraftStateException;
 import kdg.be.prog6.kdg.restaurant.domain.exceptions.InvalidPublishingException;
+import kdg.be.prog6.kdg.restaurant.domain.exceptions.InvalidScheduleException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +20,8 @@ public class DishDraft {
     private LocalDateTime scheduledPublishAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private boolean isScheduled;
+
 
 
     //Create a draft for a new dish using the Factory method
@@ -63,13 +66,34 @@ public class DishDraft {
         DishDraft draft = new DishDraft();
         draft.id = id;
         draft.restaurantId = restaurantId;
-        draft.originalDishId = originalDishId;  // null for new dishes
+        draft.originalDishId = originalDishId;
         draft.details = details;
         draft.createdAt = createdAt;
         draft.updatedAt = updatedAt;
         return draft;
     }
+    public void schedulePublish(LocalDateTime publishAt) {
+        if (publishAt.isBefore(LocalDateTime.now())) {
+            throw new InvalidScheduleException("Cannot schedule publication in the past");
+        }
+        this.scheduledPublishAt = publishAt;
+        this.isScheduled = true;
+    }
 
+    public boolean shouldPublishNow() {
+        return isScheduled &&
+                scheduledPublishAt != null &&
+                LocalDateTime.now().isAfter(scheduledPublishAt);
+    }
+
+    public void restoreScheduledState(LocalDateTime scheduledPublishAt) {
+        this.scheduledPublishAt = scheduledPublishAt;
+        this.isScheduled = true;
+    }
+    public void cancelSchedule() {
+        this.scheduledPublishAt = null;
+        this.isScheduled = false;
+    }
 
 
     public void editDetails(DishDetails newDetails) {
@@ -110,5 +134,9 @@ public class DishDraft {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public boolean isScheduled() {
+        return isScheduled;
     }
 }

@@ -119,6 +119,9 @@ CREATE INDEX idx_dish_drafts_restaurant_id ON dish_drafts(restaurant_id);
 CREATE INDEX idx_dish_drafts_original_dish_id ON dish_drafts(original_dish_id);
 CREATE INDEX idx_dish_drafts_scheduled ON dish_drafts(scheduled_publish_at);
 
+ALTER TABLE dish_drafts ADD COLUMN scheduled_publish_at TIMESTAMP;
+ALTER TABLE dish_drafts ADD COLUMN is_scheduled BOOLEAN DEFAULT FALSE;
+
 -- Orders table
 CREATE TABLE IF NOT EXISTS orders (
                                       id UUID PRIMARY KEY,

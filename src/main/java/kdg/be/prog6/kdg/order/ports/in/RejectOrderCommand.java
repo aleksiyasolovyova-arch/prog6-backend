@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record RejectOrderCommand(
         OrderId orderId,
-        UUID restaurantId
+        UUID restaurantId,
+        String reason
 ) {
 }

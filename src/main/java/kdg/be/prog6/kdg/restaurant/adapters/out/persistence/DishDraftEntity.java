@@ -31,6 +31,12 @@ public class DishDraftEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "scheduled_publish_at")
+    private LocalDateTime scheduledPublishAt;
+
+    @Column(name = "is_scheduled")
+    private boolean isScheduled;
+
     protected DishDraftEntity() {}
 
     // Getters, setters...
@@ -50,4 +56,24 @@ public class DishDraftEntity {
     public void setIsNewDish(boolean newDish) { isNewDish = newDish; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public LocalDateTime getScheduledPublishAt() {
+        return scheduledPublishAt;
+    }
+
+    public void setScheduledPublishAt(LocalDateTime scheduledPublishAt) {
+        this.scheduledPublishAt = scheduledPublishAt;
+    }
+
+    public void setNewDish(boolean newDish) {
+        isNewDish = newDish;
+    }
+
+    public boolean isScheduled() {
+        return isScheduled;
+    }
+
+    public void setIsScheduled(boolean scheduled) {
+        isScheduled = scheduled;
+    }
 }

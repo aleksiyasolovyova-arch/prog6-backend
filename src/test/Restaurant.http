@@ -161,3 +161,10 @@ Content-Type: application/json
 GET {{baseUrl}}/api/orders?restaurantId={{restaurantId}}
 
 
+### Schedule all drafts to publish
+POST {{baseUrl}}/api/dishes/{{restaurantId}}/dishes/schedule-publish-all
+Content-Type: application/json
+
+{
+  "publishAt": "2025-10-29T14:13:00"
+}

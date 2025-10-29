@@ -21,17 +21,19 @@ public class DishDraftMapper {
         DishDraftEntity entity = new DishDraftEntity();
         entity.setId(draft.getId().uuid());
         entity.setRestaurantId(draft.getRestaurantId().uuid());
-        
-        // Handle nullable originalDishId (null for new dishes)
+
         if (draft.getOriginalDishId() != null) {
             entity.setOriginalDishId(draft.getOriginalDishId().uuid());
         }
-        
+
         entity.setDetails(DishDetailsEmbeddable.from(draft.getDetails()));
         entity.setIsNewDish(draft.isNewDish());
         entity.setCreatedAt(draft.getCreatedAt());
         entity.setUpdatedAt(draft.getUpdatedAt());
-        
+
+        entity.setScheduledPublishAt(draft.getScheduledPublishAt());
+        entity.setIsScheduled(draft.isScheduled());
+
         return entity;
     }
 
@@ -44,15 +46,23 @@ public class DishDraftMapper {
             return null;
         }
 
-        return DishDraft.reconstitute(
+        DishDraft draft = DishDraft.reconstitute(
                 DraftId.from(entity.getId()),
                 RestaurantId.from(entity.getRestaurantId()),
-                entity.getOriginalDishId() != null 
-                    ? DishId.from(entity.getOriginalDishId())
-                    : null,
+                entity.getOriginalDishId() != null
+                        ? DishId.from(entity.getOriginalDishId())
+                        : null,
                 entity.getDetails().toDomain(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
+
+        // NEW - Restore scheduling state without validation
+        // (The validation already happened when it was first scheduled)
+        if (entity.isScheduled() && entity.getScheduledPublishAt() != null) {
+            draft.restoreScheduledState(entity.getScheduledPublishAt());
+        }
+
+        return draft;
     }
 }

@@ -3,6 +3,7 @@ package kdg.be.prog6.kdg.order.adapters.in;
 import kdg.be.prog6.kdg.common.DishNotAvailableException;
 import kdg.be.prog6.kdg.common.DishNotFoundException;
 import kdg.be.prog6.kdg.order.adapters.in.request.PlaceOrderDto;
+import kdg.be.prog6.kdg.order.adapters.in.request.RejectOrderRequest;
 import kdg.be.prog6.kdg.order.adapters.in.response.OrderResponse;
 import kdg.be.prog6.kdg.order.core.AcceptOrderUseCaseImpl;
 import kdg.be.prog6.kdg.order.core.MarkOrderReadyUseCaseImpl;
@@ -75,11 +76,12 @@ public class OrderController {
     @PostMapping("/{orderId}/reject")
     public ResponseEntity<Void> rejectOrder(
             @PathVariable UUID orderId,
-            @RequestParam UUID restaurantId
+            @RequestParam UUID restaurantId,
+            @RequestBody RejectOrderRequest request
     )
     {
         rejectOrderService.rejectOrder(
-                new RejectOrderCommand(OrderId.from(orderId), restaurantId)
+                new RejectOrderCommand(OrderId.from(orderId), restaurantId, request.reason())
         );
         return ResponseEntity.noContent().build();
     }
