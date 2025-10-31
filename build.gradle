@@ -26,11 +26,16 @@ dependencies {
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //    testImplementation 'org.mockito:mockito-inline'
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-oauth2-jose")
+    implementation("org.springframework.boot:spring-boot-starter-amqp")
+    testImplementation("org.springframework.amqp:spring-rabbit-test")
+    implementation("org.springframework.modulith:spring-modulith-events-amqp")
     implementation 'org.springframework.modulith:spring-modulith-core:1.1.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-devtools'
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation 'org.postgresql:postgresql:42.7.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

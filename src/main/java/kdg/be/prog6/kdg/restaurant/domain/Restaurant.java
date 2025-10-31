@@ -277,6 +277,54 @@ public class Restaurant {
         return openingHours.isOpenNow();
     }
 
+    public void verifyOwnership(OwnerId authenticatedOwnerId) {
+        if (!this.ownerId.equals(authenticatedOwnerId)) {
+            throw new UnauthorizedRestaurantAccessException(
+                    "Owner " + authenticatedOwnerId.uuid() +
+                            " does not own restaurant " + this.restaurantId.uuid()
+            );
+        }
+    }
+
+    public boolean isOwnedBy(OwnerId owner) {
+        return this.ownerId.equals(owner);
+    }
+
+    public void updateSettings(
+            OwnerId authenticatedOwnerId,
+            String newName,
+            OpeningHours newOpeningHours,
+            List<String> newPictureUrls
+    ) {
+        verifyOwnership(authenticatedOwnerId);  // ✅ Enforce authorization
+
+        this.name = newName;
+        this.openingHours = newOpeningHours;
+        this.pictureUrls = new ArrayList<>(newPictureUrls);
+
+        registerEvent(new RestaurantSettingsUpdatedEvent(
+                this.restaurantId.uuid(),
+                this.ownerId.uuid()
+        ));
+    }
+
+    public void updateContactInfo(
+            OwnerId authenticatedOwnerId,
+            Email newEmail,
+            Address newAddress
+    ) {
+        verifyOwnership(authenticatedOwnerId);  // ✅ Enforce authorization
+
+        this.email = newEmail;
+        this.address = newAddress;
+
+        registerEvent(new RestaurantContactUpdatedEvent(
+                this.restaurantId.uuid(),
+                this.ownerId.uuid()
+        ));
+    }
+
+
     public void openManually() {
         if (manuallyOpen) {
             return;
@@ -296,6 +344,20 @@ public class Restaurant {
 
         registerEvent(new RestaurantClosedEvent(this.restaurantId.uuid(), true));
     }
+
+    public void overrideOpeningStatus(
+            OwnerId authenticatedOwnerId,
+            boolean forceOpen
+    ) {
+        verifyOwnership(authenticatedOwnerId);  // ✅ Enforce authorization
+
+        if (forceOpen) {
+            openManually();
+        } else {
+            closeManually();
+        }
+    }
+
 
     public void resetManualOverride() {
         boolean wasManuallyControlled = manuallyOpen || manuallyClosed;

@@ -6,18 +6,18 @@ import kdg.be.prog6.kdg.restaurant.ports.in.CreateRestaurantCommand;
 
 import java.util.List;
 
-public record CreateRestaurantRequest(String ownerId,
+public record CreateRestaurantRequest(
                                       String name,
                                       RestaurantDto.AddressDto address,
                                       String contactEmail,
                                       List<String> pictureUrls,
                                       int defaultPreparationTimeMinutes,
                                       String cuisineType,
-                                      RestaurantDto.OpeningHoursDto openingHours
+                                      OpeningHoursDto openingHours
 ) {
-    public CreateRestaurantCommand toCommand() {
+    public CreateRestaurantCommand toCommand(OwnerId ownerId) {
         return new CreateRestaurantCommand(
-                OwnerId.from(ownerId),
+                ownerId,
                 name,
                 address.toDomain(),
                 Email.of(contactEmail),

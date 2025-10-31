@@ -67,10 +67,32 @@ public class Order {
         this.status = OrderStatus.ACCEPTED;
         this.acceptedAt = LocalDateTime.now();
 
+        // Build event payload matching new OrderAcceptedEvent signature
+        UUID eventId = UUID.randomUUID();
+        String occurredAt = this.acceptedAt.toString();
+
+        // Map dropoff (customer) address
+        AddressDto dropoffAddress = new AddressDto(
+                this.customerInfo.address().street(),
+                this.customerInfo.address().number(),
+                this.customerInfo.address().postalCode(),
+                this.customerInfo.address().city()
+        );
+
+        // Pickup address/coordinates are not available in Order domain; pass nulls for now
+        PickupAddressDto pickupAddress = null;
+        CoordinatesDto pickUpCoordinates = null;
+        CoordinatesDto dropoffCoordinates = null;
+
         registerEvent(new OrderAcceptedEvent(
+                eventId,
                 this.orderId.uuid(),
+                occurredAt,
                 this.restaurantId,
-                this.acceptedAt
+                pickupAddress,
+                pickUpCoordinates,
+                dropoffAddress,
+                dropoffCoordinates
         ));
     }
 
@@ -114,10 +136,14 @@ public class Order {
         this.readyAt = LocalDateTime.now();
         this.estimatedReadyAt = this.readyAt;
 
+        // Build event payload matching new OrderReadyForPickupEvent signature
+        UUID eventId = UUID.randomUUID();
+        String occurredAt = this.readyAt.toString();
         registerEvent(new OrderReadyForPickupEvent(
-                this.orderId.uuid(),
+                eventId,
+                occurredAt,
                 this.restaurantId,
-                this.readyAt
+                this.orderId.uuid()
         ));
     }
 

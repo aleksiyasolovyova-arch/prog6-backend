@@ -32,10 +32,14 @@ services:
       - ./rabbitmq/log/:/var/log/rabbitmq/
   
   delivery_service:
+    depends_on:
+      - app_rabbitmq
     image: registry.gitlab.com/kdg-ti/programming6/material/2025-2026/delivery-service
     environment:
       SPRING_PROFILES_ACTIVE: 'docker'
       SPRING_RABBITMQ_HOST: 'app_rabbitmq'
+      SPRING_RABBITMQ_USERNAME: 'user'
+      SPRING_RABBITMQ_PASSWORD: 'password'
     pull_policy: "always"
     ports:
       - "8095:8095"

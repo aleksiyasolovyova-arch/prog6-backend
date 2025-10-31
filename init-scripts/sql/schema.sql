@@ -190,19 +190,37 @@ CREATE TABLE outbox (
 CREATE INDEX idx_outbox_published ON outbox(published);
 CREATE INDEX idx_outbox_created_at ON outbox(created_at);
 
--- ========================================
--- SAMPLE DATA (OPTIONAL - for development/testing)
--- ========================================
 
--- Sample owner
-INSERT INTO owners (id, email, password_hash)
-VALUES (
-           'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-           'owner@legourmet.com',
-           '$2a$10$dummy_hash_for_testing'
-       ) ON CONFLICT DO NOTHING;
+-- ========================================
+-- GRANT PERMISSIONS
+-- ========================================
+GRANT USAGE ON SCHEMA public TO "user";
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "user";
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "user";
 
--- Sample restaurant
+
+-- ========================================
+-- Sample Owners
+-- ========================================
+-- ========================================
+-- Owners
+-- ========================================
+-- Insert owner
+INSERT INTO owners (
+    id,
+    email,
+    password_hash
+) VALUES (
+             'f47ac10b-58cc-4372-a567-0e02b2c3d479',  -- owner ID used in restaurants
+             'owner@legourmet.com',                     -- owner's email
+             '$2a$10$dummy_hash_for_testing'            -- password hash (dummy for testing)
+         );
+
+
+-- ========================================
+-- Restaurants
+-- ========================================
+-- Insert a single restaurant
 INSERT INTO restaurants (
     id,
     owner_id,
@@ -213,80 +231,203 @@ INSERT INTO restaurants (
     contact_email,
     cuisine_type,
     default_preparation_time_minutes,
-    opening_hours_monday,
-    opening_hours_tuesday,
-    opening_hours_wednesday,
-    opening_hours_thursday,
-    opening_hours_friday,
-    opening_hours_saturday,
-    opening_hours_sunday
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
+    sunday,
+    created_at
 ) VALUES (
-             '550e8400-e29b-41d4-a716-446655440000',
-             'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-             'Le Gourmet',
-             'Rue de Paris',
-             'Brussels',
-             '1000',
-             'owner@legourmet.com',
-             'FRENCH',
-             20,
-             '09:00-18:00',
-             '09:00-18:00',
-             '09:00-18:00',
-             '09:00-18:00',
-             '09:00-18:00',
-             '10:00-16:00',
-             ''  -- Closed on Sunday
-         ) ON CONFLICT DO NOTHING;
+             '550e8400-e29b-41d4-a716-446655440000',  -- restaurant ID used in dish_drafts
+             'f47ac10b-58cc-4372-a567-0e02b2c3d479',  -- owner ID (must exist in owners table)
+             'Le Gourmet',                             -- name
+             'Rue de Paris',                           -- street
+             'Brussels',                               -- city
+             '1000',                                   -- postal code
+             'info@legourmet.com',                     -- contact email
+             'FRENCH',                                 -- cuisine type
+             30,                                       -- default preparation time in minutes
+             '09:00-18:00',                            -- monday
+             '09:00-18:00',                            -- tuesday
+             '09:00-18:00',                            -- wednesday
+             '09:00-18:00',                            -- thursday
+             '09:00-18:00',                            -- friday
+             '10:00-16:00',                            -- saturday
+             '',                                       -- sunday (closed)
+             NOW()                                     -- created_at
+         );
 
--- Sample published dish
+
+-- ========================================
+-- Dishes
+-- ========================================
+-- ========================================
+-- Dishes (corrected UUIDs)
+-- ========================================
+-- Insert two dishes for a restaurant
 INSERT INTO dishes (
     id,
     restaurant_id,
     name,
     description,
+    dish_type,
     price_amount,
     price_currency,
-    dish_type,
-    is_available_for_order,
-    preparation_time_minutes
-) VALUES (
-             'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-             '550e8400-e29b-41d4-a716-446655440000',
-             'Coq au Vin',
-             'Traditional French chicken stew with red wine and mushrooms',
-             24.50,
-             'EUR',
-             'MAIN',
-             TRUE,
-             30
-         ) ON CONFLICT DO NOTHING;
+    available_for_order,
+    created_at,
+    updated_at,
+    food_tags,
+    picture_url
+) VALUES
+      (
+          gen_random_uuid(),                  -- dish 1 ID
+          '550e8400-e29b-41d4-a716-446655440000',  -- restaurant_id
+          'Caprese Salad',                    -- name
+          'Fresh mozzarella, tomatoes, and basil drizzled with olive oil',  -- description
+          'START',                            -- dish_type
+          7.50,                               -- price_amount
+          'EUR',                              -- price_currency
+          TRUE,                               -- available_for_order
+          NOW(),                              -- created_at
+          NOW(),                              -- updated_at
+          'VEGETARIAN',                -- food_tags
+          'https://example.com/caprese.jpg'  -- picture_url
+      ),
+      (
+          gen_random_uuid(),                  -- dish 2 ID
+          '550e8400-e29b-41d4-a716-446655440000',  -- restaurant_id
+          'Spaghetti Carbonara',              -- name
+          'Classic Italian pasta with pancetta, egg, and parmesan',  -- description
+          'MAIN',                             -- dish_type
+          13.50,                              -- price_amount
+          'EUR',                              -- price_currency
+          TRUE,                               -- available_for_order
+          NOW(),                              -- created_at
+          NOW(),                              -- updated_at
+          'VEGAN',                   -- food_tags
+          'https://example.com/carbonara.jpg' -- picture_url
+      );
 
-INSERT INTO dishes (
+-- ========================================
+-- Dish Drafts
+-- ========================================
+-- Insert two dish drafts for a restaurant
+INSERT INTO dish_drafts (
     id,
     restaurant_id,
+    original_dish_id,
     name,
     description,
+    dish_type,
     price_amount,
     price_currency,
-    dish_type,
-    is_available_for_order,
-    preparation_time_minutes
-) VALUES (
-             'b1ffcd10-a0d0-5fg9-cc7e-7cc0ce491b22',
-             '550e8400-e29b-41d4-a716-446655440000',
-             'Crème Brûlée',
-             'Classic French vanilla custard with caramelized sugar top',
-             8.50,
-             'EUR',
-             'DESSERT',
-             TRUE,
-             15
-         ) ON CONFLICT DO NOTHING;
+    is_new_dish,
+    is_scheduled,
+    created_at,
+    updated_at,
+    scheduled_publish_at,
+    food_tags,
+    picture_url
+) VALUES
+      (
+          gen_random_uuid(),                  -- draft 1 ID
+          '550e8400-e29b-41d4-a716-446655440000',  -- restaurant_id
+          NULL,                               -- original_dish_id (new dish)
+          'Tomato Bruschetta',                -- name
+          'Grilled bread topped with fresh tomato, garlic and basil',  -- description
+          'START',                            -- dish_type
+          6.50,                               -- price_amount
+          'EUR',                              -- price_currency
+          TRUE,                               -- is_new_dish
+          FALSE,                              -- is_scheduled
+          NOW(),                              -- created_at
+          NOW(),                              -- updated_at
+          NULL,                               -- scheduled_publish_at
+          'VEGETARIAN',            -- food_tags
+          'https://example.com/bruschetta.jpg' -- picture_url
+      ),
+      (
+          gen_random_uuid(),                  -- draft 2 ID
+          '550e8400-e29b-41d4-a716-446655440000',  -- restaurant_id
+          NULL,                               -- original_dish_id (new dish)
+          'Margherita Pizza',                 -- name
+          'Classic pizza with tomato, mozzarella and fresh basil',  -- description
+          'MAIN',                             -- dish_type
+          12.50,                              -- price_amount
+          'EUR',                              -- price_currency
+          TRUE,                               -- is_new_dish
+          FALSE,                              -- is_scheduled
+          NOW(),                              -- created_at
+          NOW(),                              -- updated_at
+          NULL,                               -- scheduled_publish_at
+          'VEGETARIAN',                -- food_tags
+          'https://example.com/margherita.jpg' -- picture_url
+      );
 
 -- ========================================
--- GRANT PERMISSIONS
+-- Sample Orders
 -- ========================================
-GRANT USAGE ON SCHEMA public TO "user";
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "user";
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "user";
+INSERT INTO orders (
+    id,
+    restaurant_id,
+    restaurant_name,
+    customer_name,
+    customer_email,
+    delivery_street,
+    delivery_number,
+    delivery_postal_code,
+    delivery_city,
+    delivery_country,
+    status,
+    total_amount,
+    ordered_at,
+    estimated_ready_at,
+    decision_deadline
+) VALUES (
+             '11111111-1111-1111-1111-111111111111', -- order UUID
+             '550e8400-e29b-41d4-a716-446655440000', -- restaurant ID
+             'La Trattoria',                           -- restaurant name
+             'John Doe',                               -- customer name
+             'john.doe@example.com',                   -- customer email
+             'Rue de la Paix',                         -- delivery street
+             '42',                                     -- delivery number
+             '1000',                                   -- delivery postal code
+             'Brussels',                               -- delivery city
+             'Belgium',                                -- delivery country
+             'PENDING',                                -- order status
+             49.00,                                    -- total amount
+             CURRENT_TIMESTAMP,                        -- ordered_at
+             CURRENT_TIMESTAMP + INTERVAL '30 minutes',-- estimated_ready_at
+             CURRENT_TIMESTAMP + INTERVAL '1 hour'     -- decision_deadline
+         );
+
+-- ========================================
+-- Sample Order Lines
+-- ========================================
+-- Sample order lines
+INSERT INTO order_lines (
+    id,
+    order_id,
+    dish_id,
+    dish_name,
+    price_at_order_time,
+    quantity
+) VALUES
+      (
+          '22222222-2222-2222-2222-222222222222',       -- order line UUID
+          '11111111-1111-1111-1111-111111111111',       -- order UUID
+          'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',       -- first dish UUID
+          'Coq au Vin',                                 -- first dish name
+          24.50,                                        -- price at order time
+          1                                             -- quantity
+      ),
+      (
+          '33333333-3333-3333-3333-333333333333',       -- order line UUID
+          '11111111-1111-1111-1111-111111111111',       -- order UUID
+          'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',       -- second dish UUID
+          'Crème Brûlée',                               -- second dish name
+          8.50,                                         -- price at order time
+          2                                             -- quantity
+      );

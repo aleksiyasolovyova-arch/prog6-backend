@@ -1,10 +1,27 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+@baseUrl = http://localhost:8081
+@contentType = application/json
 
-### Create Restaurant
+### Get JWT token
+# @no-cookie-jar
+POST http://localhost:8180/realms/kdg/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=kdg-frontend&username=testowner&password=testowner&grant_type=password
+
+> {%
+    client.test("Token received", function() {
+        client.assert(response.status === 200, "Failed to get token");
+    });
+
+    var token = response.body.access_token;
+    client.global.set("token", token);
+    client.log("Token saved: " + token.substring(0, 20) + "...");
+%}
+
+### Create Restaurant (with JWT)
 POST {{baseUrl}}/api/restaurants
-Content-Type: application/json
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
   "ownerId": "550e8400-e29b-41d4-a716-446655440000",
@@ -31,28 +48,38 @@ Content-Type: application/json
 
 > {%
     client.test("Restaurant created successfully", function() {
-        client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
+        client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201, got " + response.status);
     });
 
-    // Extract the restaurantId from response
-    var restaurantId = response.body.uuid;
+    var restaurantId = response.body.id;
     client.global.set("restaurantId", restaurantId);
     client.log("Restaurant ID saved: " + restaurantId);
 %}
 
-### Create a Draft
+### Get all restaurants (no auth needed)
+GET {{baseUrl}}/api/restaurants
+Content-Type: {{contentType}}
+
+### Get Restaurant details (no auth needed)
+GET {{baseUrl}}/api/restaurants/{{restaurantId}}
+Content-Type: {{contentType}}
+
+### Get Restaurant Menu (no auth needed)
+GET {{baseUrl}}/api/restaurants/{{restaurantId}}/menu
+Content-Type: {{contentType}}
+
+### Create a Draft (with JWT)
 POST {{baseUrl}}/api/dishes/drafts
-Content-Type: application/json
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
   "restaurantId": "{{restaurantId}}",
   "name": "Coq au Vin",
   "type": "MAIN",
-  "foodTags": ["vegan", "gluten_free"],
   "description": "Traditional French chicken stew cooked in red wine",
   "priceAmount": 24.50,
-  "priceCurrency": "EUR",
-  "pictureUrl": "https://example.com/coq-au-vin.jpg"
+  "priceCurrency": "EUR"
 }
 
 > {%
@@ -60,65 +87,29 @@ Content-Type: application/json
         client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
     });
 
-    // Extract the draftId from response
     var draftId = response.body.uuid || response.body.draftId;
-
     client.global.set("draftId", draftId);
-
     client.log("Draft ID saved: " + draftId);
 %}
 
-### Publish dish
+### Publish dish (with JWT)
 POST {{baseUrl}}/api/dishes/drafts/{{draftId}}/publish?restaurantId={{restaurantId}}
-Content-Type: application/json
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 > {%
     client.test("Draft published successfully", function() {
         client.assert(response.status === 200 || response.status === 204, "Expected successful response");
     });
 
-    var dishId = response.body.uuid
+    var dishId = response.body.uuid;
     client.global.set("dishId", dishId);
     client.log("Dish ID saved after publish: " + dishId);
 %}
 
-
-### Unpublish a dish
-DELETE {{baseUrl}}/api/dishes/{{dishId}}/unpublish?restaurantId={{restaurantId}}
-
-### Mark out of stock
-POST {{baseUrl}}/api/dishes/{{dishId}}/out-of-stock?restaurantId={{restaurantId}}
-Content-Type: application/json
-
-### Mark in stock
-POST {{baseUrl}}/api/dishes/{{dishId}}/in-stock?restaurantId={{restaurantId}}
-Content-Type: application/json
-
-### Check pending changes
-GET {{baseUrl}}/api/dishes/pending-changes?restaurantId={{restaurantId}}
-
-### Publish all at once
-POST {{baseUrl}}/api/dishes/publish-all?restaurantId={{restaurantId}}
-
-### Get all restaurants
-GET {{baseUrl}}/api/restaurants
-Content-Type: application/json
-
-### Get Restaurant's details
-GET {{baseUrl}}/api/restaurants/{{restaurantId}}
-Content-Type: application/json
-
-### Get Menu
-GET {{baseUrl}}/api/restaurants/{{restaurantId}}/menu
-Content-Type: application/json
-
-### Get Dish's details
-GET {{baseUrl}}/api/dishes/{{dishId}}/details?restaurantId={{restaurantId}}
-Content-Type: application/json
-
-### Place order in theory
-POST {{baseUrl}}/api/orders
-Content-Type: application/json
+### Place order (no auth)
+POST {{baseUrl}}/api/customers/orders
+Content-Type: {{contentType}}
 
 {
   "customerName": "John Doe",
@@ -140,31 +131,28 @@ Content-Type: application/json
 }
 
 > {%
-    client.test("Request executed successfully", function() {
+    client.test("Order placed successfully", function() {
         client.assert(response.status === 201 || response.status === 200, "Expected status 200 or 201");
     });
 
-    client.global.set("orderId", response.body.orderId);
+    var orderId = response.body.orderId || response.body.uuid;
+    client.global.set("orderId", orderId);
+    client.log("Order ID saved: " + orderId);
 %}
 
-### Accept the order
+### Accept order (with JWT)
 POST {{baseUrl}}/api/orders/{{orderId}}/accept?restaurantId={{restaurantId}}
-Content-Type: application/json
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
-### Mark as ready
+### Mark as ready (with JWT)
 POST {{baseUrl}}/api/orders/{{orderId}}/ready?restaurantId={{restaurantId}}
-Content-Type: application/json
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
-
-
-### Track Order
+### Get owner's orders (with JWT)
 GET {{baseUrl}}/api/orders?restaurantId={{restaurantId}}
+Authorization: Bearer {{token}}
 
-
-### Schedule all drafts to publish
-POST {{baseUrl}}/api/dishes/{{restaurantId}}/dishes/schedule-publish-all
-Content-Type: application/json
-
-{
-  "publishAt": "2025-10-29T14:13:00"
-}
+### Track order (no auth)
+GET {{baseUrl}}/api/customers/orders/{{orderId}}/track

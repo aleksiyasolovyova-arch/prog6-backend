@@ -1,5 +1,6 @@
 package kdg.be.prog6.kdg.restaurant.adapters.out.persistence;
 
+import kdg.be.prog6.kdg.restaurant.domain.OwnerId;
 import kdg.be.prog6.kdg.restaurant.domain.Restaurant;
 import kdg.be.prog6.kdg.restaurant.domain.RestaurantId;
 import kdg.be.prog6.kdg.common.RestaurantNotFoundException;
@@ -41,6 +42,14 @@ public class RestaurantJpaAdapter implements RestaurantRepositoryPort {
             );
         }
         return Optional.ofNullable(mapper.toDomain(entity.get()));
+    }
+
+    @Override
+    public Optional<Restaurant> findByOwnerId(OwnerId ownerId) {
+        // Fetch the restaurant entity using the JPA repository
+        return jpaRepo
+                .findByOwnerId(ownerId.uuid()) // JPA call using UUID as the key
+                .map(mapper::toDomain); // Convert to domain entity using the mapper
     }
 
     @Override
